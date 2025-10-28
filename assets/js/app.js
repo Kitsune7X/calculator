@@ -8,7 +8,6 @@ buttons.forEach((button) => {
     audio();
     if (e.target.id === "btn-sound-switch") {
       mute(e.target);
-      //   e.target.
     }
   });
 });

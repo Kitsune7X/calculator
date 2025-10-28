@@ -65,10 +65,8 @@ button {
 #calculator-wrapper {
   width: 25rem;
   height: 35rem;
-  /* background-color: #9929ea; */
   border: 3px solid #000000;
   border-radius: 2rem;
-  /* box-shadow: 0 0 9px #9929ea; */
   display: flex;
   flex-direction: column;
   padding: 1.3rem 1rem 2rem 1rem;
@@ -76,12 +74,17 @@ button {
   gap: 1rem;
 }
 
+@media screen and (width <= 480px) {
+  #calculator-wrapper {
+    width: 90%;
+  }
+}
+
 /* ---------- Wrapper — END ---------- */
 
 /* ---------- Logo — START ---------- */
 
 #header {
-  /* flex-direction: column; */
   justify-content: space-between;
   margin-bottom: 1rem;
   align-items: center;
@@ -96,7 +99,6 @@ button {
   background-color: #000;
   font-size: 1.2rem;
   color: #f6f6f6;
-  /* padding: 0.2rem 1.5rem; */
   width: 4rem;
   padding: 0.2rem 0;
   border-radius: 4px;

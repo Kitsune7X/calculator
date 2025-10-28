@@ -26,12 +26,28 @@ body {
 }
 
 body {
+  margin: 0;
   justify-content: center;
   align-items: center;
 }
 
+img,
+picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .flex {
   display: flex;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: "Google Sans Code", monospace;
+  font-size: 1.4rem;
 }
 
 /* ============================== */
@@ -44,15 +60,121 @@ body {
 /* 🔸 Calculator — START     */
 /* ============================== */
 
+/* ---------- Wrapper — START ---------- */
+
 #calculator-wrapper {
-  width: 30rem;
+  width: 25rem;
   height: 35rem;
   /* background-color: #9929ea; */
   border: 3px solid #000000;
   border-radius: 2rem;
   /* box-shadow: 0 0 9px #9929ea; */
+  display: flex;
+  flex-direction: column;
+  padding: 1.3rem 1rem 2rem 1rem;
+  justify-content: flex-start;
+  gap: 1rem;
 }
 
+/* ---------- Wrapper — END ---------- */
+
+/* ---------- Logo — START ---------- */
+
+#header {
+  /* flex-direction: column; */
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+#logo {
+  width: 6rem;
+  height: auto;
+}
+
+#btn-sound-switch {
+  background-color: #000;
+  font-size: 1.2rem;
+  color: #f6f6f6;
+  /* padding: 0.2rem 1.5rem; */
+  width: 4rem;
+  padding: 0.2rem 0;
+  border-radius: 4px;
+}
+/* ---------- Logo — END ---------- */
+
+/* ---------- Display — START ---------- */
+
+#calculator-display {
+  flex-direction: column;
+  border: 3.5px solid #000;
+  border-radius: 0.5rem;
+  width: 100%;
+  height: 20rem;
+  background-color: #cfffe2;
+  align-items: flex-end;
+  padding: 1.3rem 1.2rem 0.5rem 1.2rem;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+#calculator-display-row-top {
+  font-size: 1.7rem;
+  color: #0d5e51;
+}
+
+#calculator-display-row-bottom {
+  font-size: 3.4rem;
+  font-weight: 500;
+}
+
+/* ---------- Display — END ---------- */
+
+/* ---------- Keypad — START ---------- */
+
+#calculator-keypad {
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+  height: 20%;
+  justify-content: space-between;
+}
+
+#calculator-keypad button {
+  border: 2px solid #000;
+  width: 22%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+/* ---------- Operators key — START ---------- */
+
+#btn-parenthesis-open,
+#btn-parenthesis-close,
+#btn-clear-all,
+#btn-clear,
+#btn-divide,
+#btn-multiply,
+#btn-minus,
+#btn-plus {
+  background-color: #a2d5c6;
+}
+
+/* ---------- Operators key — END ---------- */
+
+#btn-equal {
+  background-color: #cfffe2;
+}
+
+/* ---------- Keypad — END ---------- */
 /* ============================== */
 /* 🔸 Calculator — END       */
 /* ============================== */

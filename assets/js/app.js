@@ -27,6 +27,7 @@ const mathExpression = {
   "btn-minus": (a, b) => a - b,
   "btn-divide": (a, b) => a / b,
   "btn-multiply": (a, b) => a * b,
+  isEvaluated: false,
 };
 
 // UI state flags track what kind of input the next key press represents
@@ -84,44 +85,46 @@ function mute(target) {
 function processKey(key, length) {
   // Guard before append: only add when current length < MAX_LENGTH.
   // Using <= would allow one extra digit (overflow by one).
-  if (length < MAX_LENGTH) {
-    // New Calculation Scenario
-    // Build operands while the user is entering a fresh equation
-    if (key.className === "number" && isNewCalculation) {
-      if (!isOperatorClicked) {
-        // Populate the first operand during initial number entry
-        mathExpression.variableA += key.textContent;
-        displayBottom.textContent = `${mathExpression.variableA}`;
-      } else {
-        // Once an operator is picked, incoming digits belong to the second operand
-        mathExpression.variableB += key.textContent;
-        displayBottom.textContent = `${mathExpression.variableB}`;
-        isValidForCalculation = true;
-      }
-    }
+  if (key.className === "number" && !(length < MAX_LENGTH)) return;
 
-    // Consecutive calculation Scenario
-    // Treat new digits as the second operand when chaining operations
-    if (key.className === "number" && isConsecutive) {
-      // Continue building variableB so the last result can be reused as variableA
+  // New Calculation Scenario
+  // Build operands while the user is entering a fresh equation
+  if (key.className === "number" && isNewCalculation) {
+    if (!isOperatorClicked) {
+      // Populate the first operand during initial number entry
+      mathExpression.variableA += key.textContent;
+      displayBottom.textContent = `${mathExpression.variableA}`;
+    } else {
+      // Once an operator is picked, incoming digits belong to the second operand
       mathExpression.variableB += key.textContent;
       displayBottom.textContent = `${mathExpression.variableB}`;
       isValidForCalculation = true;
     }
+  }
 
-    // Record chosen operator and reflect it on the top display
-    if (
-      key.className === "operator" &&
-      displayBottom.textContent !== "" &&
-      !isOperatorClicked
-    ) {
-      isOperatorClicked = true; // Flip state so subsequent digits go to variableB
-      sign = key.id; // Remember which operator was chosen for later evaluation
-      if (!isConsecutive) {
-        displayTop.textContent += `${displayBottom.textContent}${key.textContent}`; // Append current operand and operator to the history display
-      } else if (isConsecutive) {
-        displayTop.textContent = `${mathExpression.variableA}${key.textContent}`; // Refresh history so it shows the carried-over result and the new operator
-      }
+  // Consecutive calculation Scenario
+  // Treat new digits as the second operand when chaining operations
+  if (key.className === "number" && isConsecutive) {
+    // Continue building variableB so the last result can be reused as variableA
+    mathExpression.variableB += key.textContent;
+    displayBottom.textContent = `${mathExpression.variableB}`;
+    isValidForCalculation = true;
+  }
+
+  // Record chosen operator and reflect it on the top display
+  if (
+    key.className === "operator" &&
+    displayBottom.textContent !== "" &&
+    !isOperatorClicked
+  ) {
+    isOperatorClicked = true; // Flip state so subsequent digits go to variableB
+    sign = key.id; // Remember which operator was chosen for later evaluation
+    if (!isConsecutive) {
+      displayTop.textContent += `${displayBottom.textContent}${key.textContent}`; // Append current operand and operator to the history display
+      displayBottom.textContent = "";
+    } else if (isConsecutive) {
+      displayTop.textContent = `${mathExpression.variableA}${key.textContent}`; // Refresh history so it shows the carried-over result and the new operator
+      displayBottom.textContent = "";
     }
   }
 
@@ -136,6 +139,7 @@ function processKey(key, length) {
     isOperatorClicked = false;
     isValidForCalculation = false;
     isNewCalculation = false;
+    mathExpression.isEvaluated = true;
   }
 
   // After the first calculation, depend on what user input next, app state will change
@@ -149,6 +153,8 @@ function processKey(key, length) {
   console.log(`A: ${mathExpression.variableA}`);
   console.log(`B: ${mathExpression.variableB}`);
   console.log(isOperatorClicked);
+  console.log(isNewCalculation);
+  console.log(isConsecutive);
 }
 
 // ---------- Mathematic function ----------
@@ -185,6 +191,13 @@ function nextAction(key) {
   }
 }
 
+// ---------- New State function ----------
+function newState(key, expression) {
+  expression.variableA = key.textContent;
+  expression.variableB = "";
+  return expression;
+}
+
 // Need a switch to change behavior depend on what user input next after calculation
 // Done for new calculation after the first one complete, need to handle cases where user make consecutive calculation
 // Need to fix the display
@@ -202,3 +215,6 @@ function nextAction(key) {
 // Add keyboard mapping??????
 
 // Make chaining with operators work instead of just "="
+
+// Need to make state check after evaluted
+// Write separate Display render function

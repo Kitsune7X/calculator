@@ -1,30 +1,25 @@
 // -------------------------------
 // Variable Declaration
 // -------------------------------
-// Max length of digits
+// Max length of digits allowed on the display
 const MAX_LENGTH = 11;
 
-// Get all the buttons
+// Collect all calculator buttons once so listeners can be attached in bulk
 const buttons = Array.from(document.querySelectorAll("button"));
 
-// Get the display
+// References to the display rows that show the current and historical input
 const displayTop = document.querySelector("#calculator-display-row-top");
 const displayBottom = document.querySelector("#calculator-display-row-bottom");
-// console.log(displayBottom);
 
 // Create an array of number key
 const numberKey = buttons.filter((button) => button.className === "number");
-// console.log(numberKey);
 
 // Create an array of operator key
 const operatorKey = buttons.filter((button) => button.className === "operator");
-// console.log(operatorKey);
 
-// let variableA = "";
-// let variableB = "";
 let sign = "";
 
-// Operator object
+// Operator object maps button ids to the concrete math operation
 const mathExpression = {
   variableA: "",
   variableB: "",
@@ -37,9 +32,13 @@ const mathExpression = {
 let isOperatorClicked = false;
 let isValidForCalculation = false;
 let isConsecutive = false;
+let isNewCalculation = true;
+
 // -------------------------------
 // Main
 // -------------------------------
+
+// Attach a click handler to every calculator button to orchestrate the UI flow
 buttons.forEach((button) => {
   button.addEventListener("click", (e) => {
     const key = e.target;
@@ -59,6 +58,7 @@ buttons.forEach((button) => {
 // -------------------------------
 
 // ---------- Play audio function ----------
+// Provides instant tactile feedback on every button press
 function audio() {
   const audio = document.querySelector("#btn-audio");
   audio.currentTime = 0;
@@ -66,6 +66,7 @@ function audio() {
 }
 
 // ---------- Mute audio function ----------
+// Toggle button sound on/off and update the toggle label
 function mute(target) {
   const audio = document.querySelector("#btn-audio");
   if (audio.muted) {
@@ -78,11 +79,13 @@ function mute(target) {
 }
 
 // ---------- Process input function ----------
+// Routes the button press to the correct state mutation path
 function processKey(key, length) {
   // Guard before append: only add when current length < MAX_LENGTH.
   // Using <= would allow one extra digit (overflow by one).
   if (length < MAX_LENGTH) {
-    if (key.className === "number") {
+    // New Calculation Scenario
+    if (key.className === "number" && isNewCalculation) {
       if (!isOperatorClicked) {
         mathExpression.variableA += key.textContent;
         displayBottom.textContent = `${mathExpression.variableA}`;
@@ -93,6 +96,13 @@ function processKey(key, length) {
       }
     }
 
+    // Consecutive calculation Scenario
+    if (key.className === "number" && isConsecutive) {
+      mathExpression.variableB += key.textContent;
+      displayBottom.textContent = `${mathExpression.variableB}`;
+      isValidForCalculation = true;
+    }
+
     // Operator
     if (
       key.className === "operator" &&
@@ -101,7 +111,11 @@ function processKey(key, length) {
     ) {
       isOperatorClicked = true;
       sign = key.id;
-      displayTop.textContent += `${displayBottom.textContent}${key.textContent}`;
+      if (!isConsecutive) {
+        displayTop.textContent += `${displayBottom.textContent}${key.textContent}`;
+      } else if (isConsecutive) {
+        displayTop.textContent = `${mathExpression.variableA}${key.textContent}`;
+      }
     }
   }
 
@@ -113,18 +127,22 @@ function processKey(key, length) {
     sign = "";
     isOperatorClicked = false;
     isValidForCalculation = false;
-    isConsecutive = true;
+    // isConsecutive = true;
+    isNewCalculation = false;
   }
 
   // After the first calculation, depend on what user input next, app state will change
-  if (isConsecutive) {
-    console.log(nextAction(key));
+  if (!isNewCalculation && !isConsecutive) {
+    nextAction(key);
   }
 
-  console.log(mathExpression.variableA);
+  console.log(`A: ${mathExpression.variableA}`);
+  console.log(`B: ${mathExpression.variableB}`);
+  console.log(isOperatorClicked);
 }
 
 // ---------- Mathematic function ----------
+// Executes the chosen operation, updates the displays, and resets temporary state
 function mathCalculation(expression, sign) {
   if (sign in expression) {
     expression.variableA = expression[sign](
@@ -139,14 +157,28 @@ function mathCalculation(expression, sign) {
   return expression;
 }
 
-// Need a switch to change behavior depend on what user input next after calculation
-
 // ---------- Consecutive state management function ----------
+// Handles the scenario where a user begins a new calculation immediately after one completes
 function nextAction(key) {
   if (key.className === "number") {
     isConsecutive = false;
+    isNewCalculation = true;
     displayTop.textContent = "";
     displayBottom.textContent = key.textContent;
-    return (mathExpression.variableA = key.textContent);
+    mathExpression.variableA = key.textContent;
+    return isNewCalculation;
+  } else if (key.className === "operator") {
+    displayTop.textContent = `${mathExpression.variableA}${key.textContent}`;
+    isOperatorClicked = true;
+    isConsecutive = true;
+    return (sign = key.id);
   }
 }
+
+// Need a switch to change behavior depend on what user input next after calculation
+// Done for new calculation after the first one complete, need to handle cases where user make consecutive calculation
+// Need to fix the display
+
+// Consecutive calculation done.
+
+// Handle cases where user reach max digit

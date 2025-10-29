@@ -17,17 +17,21 @@ const numberKey = buttons.filter((button) => button.className === "number");
 // Operator buttons trigger the arithmetic function to apply
 const operatorKey = buttons.filter((button) => button.className === "operator");
 
+// Variable to hold the current operator
 let sign = "";
 
 // Operator lookup maps button ids to their corresponding math routine
 const calcState = {
   variableA: "",
   variableB: "",
-  "btn-plus": (a, b) => a + b,
-  "btn-minus": (a, b) => a - b,
-  "btn-divide": (a, b) => a / b,
-  "btn-multiply": (a, b) => a * b,
+  "btn-plus": (a, b) => +(a + b).toFixed(2),
+  "btn-minus": (a, b) => +(a - b).toFixed(2),
+  "btn-divide": (a, b) => {
+    +b === 0 ? "Can't divide by 0" : +(a / b).toFixed(2); // Handle infinity decimal
+  },
+  "btn-multiply": (a, b) => +(a * b).toFixed(2),
   isEvaluated: false,
+  isDecimal: false,
 };
 
 // UI state flags track what kind of input the next key press represents
@@ -65,7 +69,6 @@ buttons.forEach((button) => {
     // Clear all
     if (key.id === "btn-clear-all") {
       clearAll(calcState);
-      console.log(calcState);
     }
   });
 });
@@ -117,10 +120,11 @@ function processKey(key, length) {
   // 2) Operators capture pending operations or trigger chained evaluations.
   if (key.className === "operator" && !isOperatorClicked) {
     // Prevent user from using operator before inputting any value
-    if (calcState.variableA === "") return;
+    if (!calcState.variableA) return;
     else {
       isOperatorClicked = true; // Flip state so subsequent digits go to variableB
       sign = key.id; // Remember which operator was chosen for later evaluation
+      calcState.isDecimal = false; // Reset decimal state
     }
   } else if (
     key.className === "operator" &&
@@ -143,8 +147,15 @@ function processKey(key, length) {
       isValidForCalculation = false;
     }
   }
+
+  // Handling decimal
+  if (key.id === "btn-decimal") {
+    handleDecimal(calcState);
+  }
+
   // Trace the current state so the flow is easy to debug during development.
   console.log(`A: ${calcState.variableA}`);
+  console.log(typeof calcState.variableA);
   console.log(`B: ${calcState.variableB}`);
   console.log(`Current class: ${key.className}`);
   console.log(`isEval: ${calcState.isEvaluated}`);
@@ -154,7 +165,9 @@ function processKey(key, length) {
 // Executes the chosen operation, updates the displays, and resets temporary state
 function mathCalculation(state, sign) {
   if (sign in state) {
+    // Runn the calculation depends on the sign being passed on and assign the value to A
     state.variableA = state[sign](+state.variableA, +state.variableB);
+    // Reset the state
     isValidForCalculation = false;
     state.variableB = "";
     state.isEvaluated = true;
@@ -182,6 +195,23 @@ function clearAll(state) {
   return state;
 }
 
+// ---------- Decimal handling function ----------
+function handleDecimal(state) {
+  // If the decimal button is clicked before A was input, return
+  if (!state.variableA) return;
+
+  // Do I have to make a flag check? There are already 3 flag check to keep track of
+  // Need to handle cases where user press decimal right after pressing an operator
+  if (!isOperatorClicked && !state.isDecimal) {
+    state.variableA += ".";
+    state.isDecimal = true;
+  } else if (isOperatorClicked && !state.isDecimal) {
+    state.variableB += ".";
+    state.isDecimal = true;
+  }
+  return (state.isDecimal = false);
+}
+
 // Handle decimals as well as long decimals
 
 // Add Clear all and Clear 1 by 1 function
@@ -198,4 +228,4 @@ function clearAll(state) {
 
 // Render function will be at the end
 
-// Make Clear All function
+// Handle divide by 0

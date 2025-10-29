@@ -92,44 +92,28 @@ function processKey(key, length) {
   // Using <= would allow one extra digit (overflow by one).
   if (key.className === "number" && !(length < MAX_LENGTH)) return;
 
-  // New Calculation Scenario
-  // Build operands while the user is entering a fresh equation
-  if (key.className === "number" && isNewCalculation) {
+  //
+  if (key.className === "number" && !mathExpression.isEvaluated) {
     if (!isOperatorClicked) {
       // Populate the first operand during initial number entry
       mathExpression.variableA += key.textContent;
-      displayBottom.textContent = `${mathExpression.variableA}`;
-    } else {
+    } else if (isOperatorClicked) {
       // Once an operator is picked, incoming digits belong to the second operand
       mathExpression.variableB += key.textContent;
-      displayBottom.textContent = `${mathExpression.variableB}`;
+
       isValidForCalculation = true;
     }
+  } else if (key.className === "number" && mathExpression.isEvaluated) {
+    mathExpression.variableA = key.textContent;
+    mathExpression.isEvaluated = false;
   }
 
-  // Consecutive calculation Scenario
-  // Treat new digits as the second operand when chaining operations
-  if (key.className === "number" && isConsecutive) {
-    // Continue building variableB so the last result can be reused as variableA
-    mathExpression.variableB += key.textContent;
-    displayBottom.textContent = `${mathExpression.variableB}`;
-    isValidForCalculation = true;
-  }
-
-  // Record chosen operator and reflect it on the top display
-  if (
-    key.className === "operator" &&
-    displayBottom.textContent !== "" &&
-    !isOperatorClicked
-  ) {
-    isOperatorClicked = true; // Flip state so subsequent digits go to variableB
-    sign = key.id; // Remember which operator was chosen for later evaluation
-    if (!isConsecutive) {
-      displayTop.textContent += `${displayBottom.textContent}${key.textContent}`; // Append current operand and operator to the history display
-      displayBottom.textContent = "";
-    } else if (isConsecutive) {
-      displayTop.textContent = `${mathExpression.variableA}${key.textContent}`; // Refresh history so it shows the carried-over result and the new operator
-      displayBottom.textContent = "";
+  if (key.className === "operator" && !isOperatorClicked) {
+    // Prevent user from using operator before inputting any value
+    if (mathExpression.variableA === "") return;
+    else {
+      isOperatorClicked = true; // Flip state so subsequent digits go to variableB
+      sign = key.id; // Remember which operator was chosen for later evaluation
     }
   }
 
@@ -144,7 +128,6 @@ function processKey(key, length) {
       sign = "";
       isOperatorClicked = false;
       isValidForCalculation = false;
-      // isNewCalculation = false;
     }
   }
   // Diagnostic logging keeps the developer aware of current operands and state flags
@@ -177,6 +160,8 @@ function nextAction(key, expression) {
     expression.variableA = key.textContent;
   } else if (key.className === "operator") {
     console.log("Here!");
+    isOperatorClicked = true;
+    expression.isEvaluated = false;
   }
   return expression;
 }
@@ -210,3 +195,5 @@ function newState(key, expression) {
 // Write separate Display render function
 
 // Just console log for now. Display later
+
+// Refactor to just switch state with only isEvaluated

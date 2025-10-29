@@ -11,15 +11,15 @@ const buttons = Array.from(document.querySelectorAll("button"));
 const displayTop = document.querySelector("#calculator-display-row-top");
 const displayBottom = document.querySelector("#calculator-display-row-bottom");
 
-// Create an array of number key
+// Number buttons used for building operands digit by digit
 const numberKey = buttons.filter((button) => button.className === "number");
 
-// Create an array of operator key
+// Operator buttons trigger the arithmetic function to apply
 const operatorKey = buttons.filter((button) => button.className === "operator");
 
 let sign = "";
 
-// Operator object maps button ids to the concrete math operation
+// Operator lookup maps button ids to their corresponding math routine
 const mathExpression = {
   variableA: "",
   variableB: "",
@@ -29,6 +29,7 @@ const mathExpression = {
   "btn-multiply": (a, b) => a * b,
 };
 
+// UI state flags track what kind of input the next key press represents
 let isOperatorClicked = false;
 let isValidForCalculation = false;
 let isConsecutive = false;
@@ -85,11 +86,14 @@ function processKey(key, length) {
   // Using <= would allow one extra digit (overflow by one).
   if (length < MAX_LENGTH) {
     // New Calculation Scenario
+    // Build operands while the user is entering a fresh equation
     if (key.className === "number" && isNewCalculation) {
       if (!isOperatorClicked) {
+        // Populate the first operand during initial number entry
         mathExpression.variableA += key.textContent;
         displayBottom.textContent = `${mathExpression.variableA}`;
       } else {
+        // Once an operator is picked, incoming digits belong to the second operand
         mathExpression.variableB += key.textContent;
         displayBottom.textContent = `${mathExpression.variableB}`;
         isValidForCalculation = true;
@@ -97,45 +101,51 @@ function processKey(key, length) {
     }
 
     // Consecutive calculation Scenario
+    // Treat new digits as the second operand when chaining operations
     if (key.className === "number" && isConsecutive) {
+      // Continue building variableB so the last result can be reused as variableA
       mathExpression.variableB += key.textContent;
       displayBottom.textContent = `${mathExpression.variableB}`;
       isValidForCalculation = true;
     }
 
-    // Operator
+    // Record chosen operator and reflect it on the top display
     if (
       key.className === "operator" &&
       displayBottom.textContent !== "" &&
       !isOperatorClicked
     ) {
-      isOperatorClicked = true;
-      sign = key.id;
+      isOperatorClicked = true; // Flip state so subsequent digits go to variableB
+      sign = key.id; // Remember which operator was chosen for later evaluation
       if (!isConsecutive) {
-        displayTop.textContent += `${displayBottom.textContent}${key.textContent}`;
+        displayTop.textContent += `${displayBottom.textContent}${key.textContent}`; // Append current operand and operator to the history display
       } else if (isConsecutive) {
-        displayTop.textContent = `${mathExpression.variableA}${key.textContent}`;
+        displayTop.textContent = `${mathExpression.variableA}${key.textContent}`; // Refresh history so it shows the carried-over result and the new operator
       }
     }
   }
 
   // Pass in variable for previous input for calculation when "=" is clicked
+  // Trigger final evaluation and reset state to accept chaining
   if (key.id === "btn-equal") {
+    // Bail out if the equation is still incomplete (e.g., missing second operand)
     if (!isValidForCalculation) return;
     // When the expression is valid, fire the math calculation function
     else mathCalculation(mathExpression, sign);
     sign = "";
     isOperatorClicked = false;
     isValidForCalculation = false;
-    // isConsecutive = true;
     isNewCalculation = false;
   }
 
   // After the first calculation, depend on what user input next, app state will change
+  // Delegate to the consecutive handler when chaining operations
   if (!isNewCalculation && !isConsecutive) {
+    // Inspect the next key press to decide whether to reset or keep chaining
     nextAction(key);
   }
 
+  // Diagnostic logging keeps the developer aware of current operands and state flags
   console.log(`A: ${mathExpression.variableA}`);
   console.log(`B: ${mathExpression.variableB}`);
   console.log(isOperatorClicked);
@@ -161,17 +171,17 @@ function mathCalculation(expression, sign) {
 // Handles the scenario where a user begins a new calculation immediately after one completes
 function nextAction(key) {
   if (key.className === "number") {
-    isConsecutive = false;
-    isNewCalculation = true;
-    displayTop.textContent = "";
-    displayBottom.textContent = key.textContent;
-    mathExpression.variableA = key.textContent;
+    isConsecutive = false; // Exit consecutive mode so future input rebuilds from scratch
+    isNewCalculation = true; // Flag that we are starting a fresh equation flow
+    displayTop.textContent = ""; // Clear the history display to remove previous expression
+    displayBottom.textContent = key.textContent; // Show the seed digit for the new calculation
+    mathExpression.variableA = key.textContent; // Replace the stored result with the new first operand
     return isNewCalculation;
   } else if (key.className === "operator") {
-    displayTop.textContent = `${mathExpression.variableA}${key.textContent}`;
-    isOperatorClicked = true;
-    isConsecutive = true;
-    return (sign = key.id);
+    displayTop.textContent = `${mathExpression.variableA}${key.textContent}`; // Show current result paired with the operator
+    isOperatorClicked = true; // Mark that an operator is pending so next digits target variableB
+    isConsecutive = true; // Keep consecutive mode active to support operator chaining
+    return (sign = key.id); // Store and expose the chosen operator for the next evaluation
   }
 }
 
@@ -182,3 +192,13 @@ function nextAction(key) {
 // Consecutive calculation done.
 
 // Handle cases where user reach max digit
+
+// Handle decimals as well as long decimals
+
+// Add Clear all and Clear 1 by 1 function
+
+// Remove Parenthesis function because it seems unecessary
+
+// Add keyboard mapping??????
+
+// Make chaining with operators work instead of just "="

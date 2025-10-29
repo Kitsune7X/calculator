@@ -60,6 +60,13 @@ buttons.forEach((button) => {
     if (calcState.isEvaluated) {
       nextAction(key, calcState);
     }
+
+    // Extra features:
+    // Clear all
+    if (key.id === "btn-clear-all") {
+      clearAll(calcState);
+      console.log(calcState);
+    }
   });
 });
 
@@ -97,15 +104,11 @@ function processKey(key, length) {
 
   // 1) Numbers either build the current operand or reset after a completed expression.
   if (key.className === "number" && !calcState.isEvaluated) {
-    if (!isOperatorClicked) {
-      // Populate the first operand during initial number entry
-      calcState.variableA += key.textContent;
-    } else if (isOperatorClicked) {
-      // Once an operator is picked, incoming digits belong to the second operand
-      calcState.variableB += key.textContent;
+    // Assign value to variable A or B depend on whether operator is clicked
+    const targetOperand = isOperatorClicked ? "variableB" : "variableA";
+    calcState[targetOperand] += key.textContent;
 
-      isValidForCalculation = true;
-    }
+    if (isOperatorClicked) isValidForCalculation = true;
   } else if (key.className === "number" && calcState.isEvaluated) {
     calcState.variableA = key.textContent;
     calcState.isEvaluated = false;
@@ -149,35 +152,35 @@ function processKey(key, length) {
 
 // ---------- Mathematic function ----------
 // Executes the chosen operation, updates the displays, and resets temporary state
-function mathCalculation(expression, sign) {
-  if (sign in expression) {
-    expression.variableA = expression[sign](
-      +expression.variableA,
-      +expression.variableB
-    );
+function mathCalculation(state, sign) {
+  if (sign in state) {
+    state.variableA = state[sign](+state.variableA, +state.variableB);
     isValidForCalculation = false;
-    expression.variableB = "";
-    expression.isEvaluated = true;
+    state.variableB = "";
+    state.isEvaluated = true;
   }
-  return expression;
+  return state;
 }
 
 // ---------- Consecutive state management function ----------
 // Handles the scenario where a user begins a new calculation immediately after one completes
-function nextAction(key, expression) {
+function nextAction(key, state) {
   // If user presses a number key after evaluation, reassign variableA to a the new value
-  if (key.className === "number") {
-    expression.variableA = key.textContent;
-  } else if (key.className === "operator") {
-    // console.log("Here!");
+  if (key.className === "number") state.variableA = key.textContent;
+  else if (key.className === "operator") {
     isOperatorClicked = true;
-    expression.isEvaluated = false;
+    state.isEvaluated = false;
   }
-  return expression;
+  return state;
 }
 
 // ---------- Clear all function ----------
-// function clearAll(key)
+function clearAll(state) {
+  state.variableA = "";
+  state.variableB = ""; // Set variable B to ""  too in case user press Clear All midway through inputting B
+  state.isEvaluated = "false";
+  return state;
+}
 
 // Handle decimals as well as long decimals
 

@@ -33,8 +33,6 @@ const mathExpression = {
 // UI state flags track what kind of input the next key press represents
 let isOperatorClicked = false;
 let isValidForCalculation = false;
-let isConsecutive = false;
-let isNewCalculation = true;
 
 // -------------------------------
 // Main
@@ -92,7 +90,7 @@ function processKey(key, length) {
   // Using <= would allow one extra digit (overflow by one).
   if (key.className === "number" && !(length < MAX_LENGTH)) return;
 
-  //
+  // Handle number keys
   if (key.className === "number" && !mathExpression.isEvaluated) {
     if (!isOperatorClicked) {
       // Populate the first operand during initial number entry
@@ -108,6 +106,7 @@ function processKey(key, length) {
     mathExpression.isEvaluated = false;
   }
 
+  // Handle operator keys
   if (key.className === "operator" && !isOperatorClicked) {
     // Prevent user from using operator before inputting any value
     if (mathExpression.variableA === "") return;
@@ -115,6 +114,13 @@ function processKey(key, length) {
       isOperatorClicked = true; // Flip state so subsequent digits go to variableB
       sign = key.id; // Remember which operator was chosen for later evaluation
     }
+  } else if (
+    key.className === "operator" &&
+    isOperatorClicked &&
+    isValidForCalculation
+  ) {
+    mathCalculation(mathExpression, sign);
+    sign = key.id;
   }
 
   // Pass in variable for previous input for calculation when "=" is clicked
@@ -173,14 +179,6 @@ function newState(key, expression) {
   return expression;
 }
 
-// Need a switch to change behavior depend on what user input next after calculation
-// Done for new calculation after the first one complete, need to handle cases where user make consecutive calculation
-// Need to fix the display
-
-// Consecutive calculation done.
-
-// Handle cases where user reach max digit
-
 // Handle decimals as well as long decimals
 
 // Add Clear all and Clear 1 by 1 function
@@ -189,11 +187,12 @@ function newState(key, expression) {
 
 // Add keyboard mapping??????
 
-// Make chaining with operators work instead of just "="
-
-// Need to make state check after evaluted
 // Write separate Display render function
 
 // Just console log for now. Display later
 
 // Refactor to just switch state with only isEvaluated
+
+// Render function will be at the end
+
+// Make Clear All function

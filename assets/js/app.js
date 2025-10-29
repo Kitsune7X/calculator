@@ -20,7 +20,7 @@ const operatorKey = buttons.filter((button) => button.className === "operator");
 let sign = "";
 
 // Operator lookup maps button ids to their corresponding math routine
-const mathExpression = {
+const calcState = {
   variableA: "",
   variableB: "",
   "btn-plus": (a, b) => a + b,
@@ -57,8 +57,8 @@ buttons.forEach((button) => {
     processKey(key, displayBottom.textContent.length);
 
     // Step 4: if a result was just produced, hand off to nextAction for chaining.
-    if (mathExpression.isEvaluated) {
-      nextAction(key, mathExpression);
+    if (calcState.isEvaluated) {
+      nextAction(key, calcState);
     }
   });
 });
@@ -96,25 +96,25 @@ function processKey(key, length) {
   if (key.className === "number" && !(length < MAX_LENGTH)) return;
 
   // 1) Numbers either build the current operand or reset after a completed expression.
-  if (key.className === "number" && !mathExpression.isEvaluated) {
+  if (key.className === "number" && !calcState.isEvaluated) {
     if (!isOperatorClicked) {
       // Populate the first operand during initial number entry
-      mathExpression.variableA += key.textContent;
+      calcState.variableA += key.textContent;
     } else if (isOperatorClicked) {
       // Once an operator is picked, incoming digits belong to the second operand
-      mathExpression.variableB += key.textContent;
+      calcState.variableB += key.textContent;
 
       isValidForCalculation = true;
     }
-  } else if (key.className === "number" && mathExpression.isEvaluated) {
-    mathExpression.variableA = key.textContent;
-    mathExpression.isEvaluated = false;
+  } else if (key.className === "number" && calcState.isEvaluated) {
+    calcState.variableA = key.textContent;
+    calcState.isEvaluated = false;
   }
 
   // 2) Operators capture pending operations or trigger chained evaluations.
   if (key.className === "operator" && !isOperatorClicked) {
     // Prevent user from using operator before inputting any value
-    if (mathExpression.variableA === "") return;
+    if (calcState.variableA === "") return;
     else {
       isOperatorClicked = true; // Flip state so subsequent digits go to variableB
       sign = key.id; // Remember which operator was chosen for later evaluation
@@ -124,7 +124,7 @@ function processKey(key, length) {
     isOperatorClicked &&
     isValidForCalculation
   ) {
-    mathCalculation(mathExpression, sign);
+    mathCalculation(calcState, sign);
     sign = key.id;
   }
 
@@ -134,17 +134,17 @@ function processKey(key, length) {
     if (!isValidForCalculation) return;
     // When the expression is valid, fire the math calculation function
     else {
-      mathCalculation(mathExpression, sign);
+      mathCalculation(calcState, sign);
       sign = "";
       isOperatorClicked = false;
       isValidForCalculation = false;
     }
   }
   // Trace the current state so the flow is easy to debug during development.
-  console.log(`A: ${mathExpression.variableA}`);
-  console.log(`B: ${mathExpression.variableB}`);
+  console.log(`A: ${calcState.variableA}`);
+  console.log(`B: ${calcState.variableB}`);
   console.log(`Current class: ${key.className}`);
-  console.log(`isEval: ${mathExpression.isEvaluated}`);
+  console.log(`isEval: ${calcState.isEvaluated}`);
 }
 
 // ---------- Mathematic function ----------
@@ -169,12 +169,15 @@ function nextAction(key, expression) {
   if (key.className === "number") {
     expression.variableA = key.textContent;
   } else if (key.className === "operator") {
-    console.log("Here!");
+    // console.log("Here!");
     isOperatorClicked = true;
     expression.isEvaluated = false;
   }
   return expression;
 }
+
+// ---------- Clear all function ----------
+// function clearAll(key)
 
 // Handle decimals as well as long decimals
 

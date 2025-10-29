@@ -20,12 +20,20 @@ const numberKey = buttons.filter((button) => button.className === "number");
 const operatorKey = buttons.filter((button) => button.className === "operator");
 // console.log(operatorKey);
 
-const numberArray = [];
-const operatorArray = [];
-let a = "";
-let b = "";
+let variableA = "";
+let variableB = "";
+let sign = "";
+
+// Operator object
+const operator = {
+  "btn-plus": (a, b) => a + b,
+  "btn-minus": (a, b) => a - b,
+  "btn-divide": (a, b) => a / b,
+  "btn-multiply": (a, b) => a * b,
+};
 
 let isOperatorClicked = false;
+let isValidForCalculation = false;
 // -------------------------------
 // Main
 // -------------------------------
@@ -69,18 +77,19 @@ function mute(target) {
   }
 }
 
-// ---------- Display function ----------
+// ---------- Process input function ----------
 function processKey(key, length) {
   // Guard before append: only add when current length < MAX_LENGTH.
   // Using <= would allow one extra digit (overflow by one).
   if (length < MAX_LENGTH) {
     if (key.className === "number") {
       if (!isOperatorClicked) {
-        a += key.textContent;
-        displayBottom.textContent = `${a}`;
+        variableA += key.textContent;
+        displayBottom.textContent = `${variableA}`;
       } else {
-        b += key.textContent;
-        displayBottom.textContent = `${b}`;
+        variableB += key.textContent;
+        displayBottom.textContent = `${variableB}`;
+        isValidForCalculation = true;
       }
     }
 
@@ -92,7 +101,27 @@ function processKey(key, length) {
     ) {
       // a = numberArray.join("");
       isOperatorClicked = true;
+      sign = key.id;
       displayTop.textContent += `${displayBottom.textContent}${key.textContent}`;
     }
+  }
+
+  // Pass in a and b from previous calculation
+  // Equal
+  if (key.id === "btn-equal") {
+    if (!isValidForCalculation) return;
+    else mathCalculation(variableA, variableB, sign);
+  }
+}
+
+// ---------- Mathematic function ----------
+function mathCalculation(a, b, sign) {
+  if (sign in operator) {
+    a = operator[sign](+a, +b);
+    displayTop.textContent += `${b}=`;
+    displayBottom.textContent = `${a}`;
+    isValidForCalculation = false;
+    b = "";
+    // return operator[sign](a, b);
   }
 }

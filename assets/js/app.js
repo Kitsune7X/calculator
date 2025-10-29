@@ -52,6 +52,11 @@ buttons.forEach((button) => {
 
     // Process user input
     processKey(key, displayBottom.textContent.length);
+
+    // After Math calculation, trigger actions depend on user input
+    if (mathExpression.isEvaluated) {
+      nextAction(key, mathExpression);
+    }
   });
 });
 
@@ -134,27 +139,19 @@ function processKey(key, length) {
     // Bail out if the equation is still incomplete (e.g., missing second operand)
     if (!isValidForCalculation) return;
     // When the expression is valid, fire the math calculation function
-    else mathCalculation(mathExpression, sign);
-    sign = "";
-    isOperatorClicked = false;
-    isValidForCalculation = false;
-    isNewCalculation = false;
-    mathExpression.isEvaluated = true;
+    else {
+      mathCalculation(mathExpression, sign);
+      sign = "";
+      isOperatorClicked = false;
+      isValidForCalculation = false;
+      // isNewCalculation = false;
+    }
   }
-
-  // After the first calculation, depend on what user input next, app state will change
-  // Delegate to the consecutive handler when chaining operations
-  if (!isNewCalculation && !isConsecutive) {
-    // Inspect the next key press to decide whether to reset or keep chaining
-    nextAction(key);
-  }
-
   // Diagnostic logging keeps the developer aware of current operands and state flags
   console.log(`A: ${mathExpression.variableA}`);
   console.log(`B: ${mathExpression.variableB}`);
-  console.log(isOperatorClicked);
-  console.log(isNewCalculation);
-  console.log(isConsecutive);
+  console.log(`Current class: ${key.className}`);
+  console.log(`isEval: ${mathExpression.isEvaluated}`);
 }
 
 // ---------- Mathematic function ----------
@@ -165,30 +162,23 @@ function mathCalculation(expression, sign) {
       +expression.variableA,
       +expression.variableB
     );
-    displayTop.textContent += `${expression.variableB}=`;
-    displayBottom.textContent = `${expression.variableA}`;
     isValidForCalculation = false;
     expression.variableB = "";
+    expression.isEvaluated = true;
   }
   return expression;
 }
 
 // ---------- Consecutive state management function ----------
 // Handles the scenario where a user begins a new calculation immediately after one completes
-function nextAction(key) {
+function nextAction(key, expression) {
+  // If user presses a number key after evaluation, reassign variableA to a the new value
   if (key.className === "number") {
-    isConsecutive = false; // Exit consecutive mode so future input rebuilds from scratch
-    isNewCalculation = true; // Flag that we are starting a fresh equation flow
-    displayTop.textContent = ""; // Clear the history display to remove previous expression
-    displayBottom.textContent = key.textContent; // Show the seed digit for the new calculation
-    mathExpression.variableA = key.textContent; // Replace the stored result with the new first operand
-    return isNewCalculation;
+    expression.variableA = key.textContent;
   } else if (key.className === "operator") {
-    displayTop.textContent = `${mathExpression.variableA}${key.textContent}`; // Show current result paired with the operator
-    isOperatorClicked = true; // Mark that an operator is pending so next digits target variableB
-    isConsecutive = true; // Keep consecutive mode active to support operator chaining
-    return (sign = key.id); // Store and expose the chosen operator for the next evaluation
+    console.log("Here!");
   }
+  return expression;
 }
 
 // ---------- New State function ----------
@@ -218,3 +208,5 @@ function newState(key, expression) {
 
 // Need to make state check after evaluted
 // Write separate Display render function
+
+// Just console log for now. Display later

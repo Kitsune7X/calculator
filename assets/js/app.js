@@ -39,39 +39,8 @@ buttons.forEach((button) => {
       mute(key);
     }
 
-    // When there is no input, display the initial value on the bottom row
-    if (
-      key.className === "number" &&
-      // Guard before append: only add when current length < MAX_LENGTH.
-      // Using <= would allow one extra digit (overflow by one).
-      displayBottom.textContent.length < MAX_LENGTH &&
-      !isOperatorClicked
-    ) {
-      // Push the key value to the number array
-      // numberArray.push(+key.textContent);
-      a += key.textContent;
-      // console.log(numberArray);
-
-      displayBottom.textContent = `${a}`;
-      console.log(displayBottom.textContent.length);
-    }
-
-    if (key.className === "number" && isOperatorClicked) {
-      b += key.textContent;
-      console.log(b);
-      displayBottom.textContent = `${b}`;
-    }
-
-    // Operator
-    if (
-      key.className === "operator" &&
-      displayBottom.textContent !== "" &&
-      !isOperatorClicked
-    ) {
-      // a = numberArray.join("");
-      isOperatorClicked = true;
-      displayTop.textContent += `${displayBottom.textContent}${key.textContent}`;
-    }
+    // Process user input
+    processKey(key, displayBottom.textContent.length);
   });
 });
 
@@ -97,5 +66,33 @@ function mute(target) {
   } else {
     audio.muted = true;
     target.textContent = "OFF";
+  }
+}
+
+// ---------- Display function ----------
+function processKey(key, length) {
+  // Guard before append: only add when current length < MAX_LENGTH.
+  // Using <= would allow one extra digit (overflow by one).
+  if (length < MAX_LENGTH) {
+    if (key.className === "number") {
+      if (!isOperatorClicked) {
+        a += key.textContent;
+        displayBottom.textContent = `${a}`;
+      } else {
+        b += key.textContent;
+        displayBottom.textContent = `${b}`;
+      }
+    }
+
+    // Operator
+    if (
+      key.className === "operator" &&
+      displayBottom.textContent !== "" &&
+      !isOperatorClicked
+    ) {
+      // a = numberArray.join("");
+      isOperatorClicked = true;
+      displayTop.textContent += `${displayBottom.textContent}${key.textContent}`;
+    }
   }
 }

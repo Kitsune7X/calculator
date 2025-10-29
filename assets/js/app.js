@@ -20,12 +20,14 @@ const numberKey = buttons.filter((button) => button.className === "number");
 const operatorKey = buttons.filter((button) => button.className === "operator");
 // console.log(operatorKey);
 
-let variableA = "";
-let variableB = "";
+// let variableA = "";
+// let variableB = "";
 let sign = "";
 
 // Operator object
-const operator = {
+const mathExpression = {
+  variableA: "",
+  variableB: "",
   "btn-plus": (a, b) => a + b,
   "btn-minus": (a, b) => a - b,
   "btn-divide": (a, b) => a / b,
@@ -34,13 +36,13 @@ const operator = {
 
 let isOperatorClicked = false;
 let isValidForCalculation = false;
+let isConsecutive = false;
 // -------------------------------
 // Main
 // -------------------------------
 buttons.forEach((button) => {
   button.addEventListener("click", (e) => {
     const key = e.target;
-    // console.log(e.target.className);
 
     audio();
     if (key.id === "btn-sound-switch") {
@@ -51,8 +53,6 @@ buttons.forEach((button) => {
     processKey(key, displayBottom.textContent.length);
   });
 });
-
-// Display what's being pressed
 
 // -------------------------------
 // Helper functions
@@ -84,11 +84,11 @@ function processKey(key, length) {
   if (length < MAX_LENGTH) {
     if (key.className === "number") {
       if (!isOperatorClicked) {
-        variableA += key.textContent;
-        displayBottom.textContent = `${variableA}`;
+        mathExpression.variableA += key.textContent;
+        displayBottom.textContent = `${mathExpression.variableA}`;
       } else {
-        variableB += key.textContent;
-        displayBottom.textContent = `${variableB}`;
+        mathExpression.variableB += key.textContent;
+        displayBottom.textContent = `${mathExpression.variableB}`;
         isValidForCalculation = true;
       }
     }
@@ -99,29 +99,54 @@ function processKey(key, length) {
       displayBottom.textContent !== "" &&
       !isOperatorClicked
     ) {
-      // a = numberArray.join("");
       isOperatorClicked = true;
       sign = key.id;
       displayTop.textContent += `${displayBottom.textContent}${key.textContent}`;
     }
   }
 
-  // Pass in a and b from previous calculation
-  // Equal
+  // Pass in variable for previous input for calculation when "=" is clicked
   if (key.id === "btn-equal") {
     if (!isValidForCalculation) return;
-    else mathCalculation(variableA, variableB, sign);
+    // When the expression is valid, fire the math calculation function
+    else mathCalculation(mathExpression, sign);
+    sign = "";
+    isOperatorClicked = false;
+    isValidForCalculation = false;
+    isConsecutive = true;
   }
+
+  // After the first calculation, depend on what user input next, app state will change
+  if (isConsecutive) {
+    console.log(nextAction(key));
+  }
+
+  console.log(mathExpression.variableA);
 }
 
 // ---------- Mathematic function ----------
-function mathCalculation(a, b, sign) {
-  if (sign in operator) {
-    a = operator[sign](+a, +b);
-    displayTop.textContent += `${b}=`;
-    displayBottom.textContent = `${a}`;
+function mathCalculation(expression, sign) {
+  if (sign in expression) {
+    expression.variableA = expression[sign](
+      +expression.variableA,
+      +expression.variableB
+    );
+    displayTop.textContent += `${expression.variableB}=`;
+    displayBottom.textContent = `${expression.variableA}`;
     isValidForCalculation = false;
-    b = "";
-    // return operator[sign](a, b);
+    expression.variableB = "";
+  }
+  return expression;
+}
+
+// Need a switch to change behavior depend on what user input next after calculation
+
+// ---------- Consecutive state management function ----------
+function nextAction(key) {
+  if (key.className === "number") {
+    isConsecutive = false;
+    displayTop.textContent = "";
+    displayBottom.textContent = key.textContent;
+    return (mathExpression.variableA = key.textContent);
   }
 }

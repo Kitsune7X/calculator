@@ -34,6 +34,9 @@ const mathExpression = {
 let isOperatorClicked = false;
 let isValidForCalculation = false;
 
+// Flow overview: bind DOM/state, listen for user input, funnel it through the
+// handlers below, and reuse nextAction to chain calculations.
+
 // -------------------------------
 // Main
 // -------------------------------
@@ -43,15 +46,17 @@ buttons.forEach((button) => {
   button.addEventListener("click", (e) => {
     const key = e.target;
 
+    // Step 1: deliver audio feedback so the button feels instant.
     audio();
+    // Step 2: optional mute toggle happens independently of the math flow.
     if (key.id === "btn-sound-switch") {
       mute(key);
     }
 
-    // Process user input
+    // Step 3: process the key to mutate operands and pending operators.
     processKey(key, displayBottom.textContent.length);
 
-    // After Math calculation, trigger actions depend on user input
+    // Step 4: if a result was just produced, hand off to nextAction for chaining.
     if (mathExpression.isEvaluated) {
       nextAction(key, mathExpression);
     }
@@ -90,7 +95,7 @@ function processKey(key, length) {
   // Using <= would allow one extra digit (overflow by one).
   if (key.className === "number" && !(length < MAX_LENGTH)) return;
 
-  // Handle number keys
+  // 1) Numbers either build the current operand or reset after a completed expression.
   if (key.className === "number" && !mathExpression.isEvaluated) {
     if (!isOperatorClicked) {
       // Populate the first operand during initial number entry
@@ -106,7 +111,7 @@ function processKey(key, length) {
     mathExpression.isEvaluated = false;
   }
 
-  // Handle operator keys
+  // 2) Operators capture pending operations or trigger chained evaluations.
   if (key.className === "operator" && !isOperatorClicked) {
     // Prevent user from using operator before inputting any value
     if (mathExpression.variableA === "") return;
@@ -123,8 +128,7 @@ function processKey(key, length) {
     sign = key.id;
   }
 
-  // Pass in variable for previous input for calculation when "=" is clicked
-  // Trigger final evaluation and reset state to accept chaining
+  // 3) "=" finalizes the expression and resets state for whatever comes next.
   if (key.id === "btn-equal") {
     // Bail out if the equation is still incomplete (e.g., missing second operand)
     if (!isValidForCalculation) return;
@@ -136,7 +140,7 @@ function processKey(key, length) {
       isValidForCalculation = false;
     }
   }
-  // Diagnostic logging keeps the developer aware of current operands and state flags
+  // Trace the current state so the flow is easy to debug during development.
   console.log(`A: ${mathExpression.variableA}`);
   console.log(`B: ${mathExpression.variableB}`);
   console.log(`Current class: ${key.className}`);
@@ -169,13 +173,6 @@ function nextAction(key, expression) {
     isOperatorClicked = true;
     expression.isEvaluated = false;
   }
-  return expression;
-}
-
-// ---------- New State function ----------
-function newState(key, expression) {
-  expression.variableA = key.textContent;
-  expression.variableB = "";
   return expression;
 }
 

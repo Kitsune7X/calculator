@@ -32,6 +32,7 @@ const calcState = {
   "btn-multiply": (a, b) => +(a * b).toFixed(2),
   isEvaluated: false,
   isDecimal: false,
+  isNegative: false,
 };
 
 // UI state flags track what kind of input the next key press represents
@@ -153,12 +154,18 @@ function processKey(key, length) {
     handleDecimal(calcState);
   }
 
+  // Plus Minus
+  if (key.id === "btn-plus-minus") {
+    handlePlusMinus(calcState);
+  }
+
   // Trace the current state so the flow is easy to debug during development.
   console.log(`A: ${calcState.variableA}`);
   console.log(typeof calcState.variableA);
   console.log(`B: ${calcState.variableB}`);
   console.log(`Current class: ${key.className}`);
   console.log(`isEval: ${calcState.isEvaluated}`);
+  // console.log([...calcState.variableA]);
 }
 
 // ---------- Mathematic function ----------
@@ -210,6 +217,41 @@ function handleDecimal(state) {
     state.isDecimal = true;
   }
   return (state.isDecimal = false);
+}
+
+// ---------- Plus Minus handling function ----------
+function handlePlusMinus(state) {
+  // If the plus minus button was clicked before A was input, return
+  if (!state.variableA) return;
+
+  // When variable A is valid, shift negative or positive depend on user input
+  if (!isOperatorClicked) {
+    shiftPositiveNegative(state);
+  }
+}
+
+// ---------- Shift Positive Negative function ----------
+function shiftPositiveNegative(state) {
+  if (!state.isNegative) {
+    // Put the methods in separate lines due to unshift and shift return added or removed
+    // elements perspectively. No chaining
+    state.variableA = [...state.variableA];
+    state.variableA.unshift("-");
+
+    // Need to reassgin back to variable A due to join() method return a copy
+    state.variableA = state.variableA.join("");
+
+    state.isNegative = true;
+    return state;
+  } else {
+    state.variableA = [...state.variableA];
+    state.variableA.shift();
+
+    state.variableA = state.variableA.join("");
+
+    state.isNegative = false;
+    return state;
+  }
 }
 
 // Handle decimals as well as long decimals

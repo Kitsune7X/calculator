@@ -178,6 +178,7 @@ function mathCalculation(state, sign) {
     isValidForCalculation = false;
     state.variableB = "";
     state.isEvaluated = true;
+    state.isDecimal = false;
   }
   return state;
 }
@@ -216,7 +217,7 @@ function handleDecimal(state) {
     state.variableB += ".";
     state.isDecimal = true;
   }
-  return (state.isDecimal = false);
+  return state;
 }
 
 // ---------- Plus Minus handling function ----------

@@ -30,14 +30,12 @@ const calcState = {
     +b === 0 ? "Can't divide by 0" : +(a / b).toFixed(2); // Handle infinity decimal
   },
   "btn-multiply": (a, b) => +(a * b).toFixed(2),
+  lastInputWasOperator: false,
+  canEvaluate: false,
   isEvaluated: false,
   isDecimal: false,
   isNegative: false,
 };
-
-// UI state flags track what kind of input the next key press represents
-let isOperatorClicked = false;
-let isValidForCalculation = false;
 
 // Flow overview: bind DOM/state, listen for user input, funnel it through the
 // handlers below, and reuse nextAction to chain calculations.
@@ -109,28 +107,30 @@ function processKey(key, length) {
   // 1) Numbers either build the current operand or reset after a completed expression.
   if (key.className === "number" && !calcState.isEvaluated) {
     // Assign value to variable A or B depend on whether operator is clicked
-    const targetOperand = isOperatorClicked ? "variableB" : "variableA";
+    const targetOperand = calcState.lastInputWasOperator
+      ? "variableB"
+      : "variableA";
     calcState[targetOperand] += key.textContent;
 
-    if (isOperatorClicked) isValidForCalculation = true;
+    if (calcState.lastInputWasOperator) calcState.canEvaluate = true;
   } else if (key.className === "number" && calcState.isEvaluated) {
     calcState.variableA = key.textContent;
     calcState.isEvaluated = false;
   }
 
   // 2) Operators capture pending operations or trigger chained evaluations.
-  if (key.className === "operator" && !isOperatorClicked) {
+  if (key.className === "operator" && !calcState.lastInputWasOperator) {
     // Prevent user from using operator before inputting any value
     if (!calcState.variableA) return;
     else {
-      isOperatorClicked = true; // Flip state so subsequent digits go to variableB
+      calcState.lastInputWasOperator = true; // Flip state so subsequent digits go to variableB
       sign = key.id; // Remember which operator was chosen for later evaluation
       calcState.isDecimal = false; // Reset decimal state
     }
   } else if (
     key.className === "operator" &&
-    isOperatorClicked &&
-    isValidForCalculation
+    calcState.lastInputWasOperator &&
+    calcState.canEvaluate
   ) {
     mathCalculation(calcState, sign);
     sign = key.id;
@@ -139,13 +139,13 @@ function processKey(key, length) {
   // 3) "=" finalizes the expression and resets state for whatever comes next.
   if (key.id === "btn-equal") {
     // Bail out if the equation is still incomplete (e.g., missing second operand)
-    if (!isValidForCalculation) return;
+    if (!calcState.canEvaluate) return;
     // When the expression is valid, fire the math calculation function
     else {
       mathCalculation(calcState, sign);
       sign = "";
-      isOperatorClicked = false;
-      isValidForCalculation = false;
+      calcState.lastInputWasOperator = false;
+      calcState.canEvaluate = false;
     }
   }
 
@@ -175,7 +175,7 @@ function mathCalculation(state, sign) {
     // Runn the calculation depends on the sign being passed on and assign the value to A
     state.variableA = state[sign](+state.variableA, +state.variableB);
     // Reset the state
-    isValidForCalculation = false;
+    calcState.canEvaluate = false;
     state.variableB = "";
     state.isEvaluated = true;
     state.isDecimal = false;
@@ -189,7 +189,7 @@ function nextAction(key, state) {
   // If user presses a number key after evaluation, reassign variableA to a the new value
   if (key.className === "number") state.variableA = key.textContent;
   else if (key.className === "operator") {
-    isOperatorClicked = true;
+    calcState.lastInputWasOperator = true;
     state.isEvaluated = false;
   }
   return state;
@@ -210,10 +210,10 @@ function handleDecimal(state) {
 
   // Do I have to make a flag check? There are already 3 flag check to keep track of
   // Need to handle cases where user press decimal right after pressing an operator
-  if (!isOperatorClicked && !state.isDecimal) {
+  if (!calcState.lastInputWasOperator && !state.isDecimal) {
     state.variableA += ".";
     state.isDecimal = true;
-  } else if (isOperatorClicked && !state.isDecimal) {
+  } else if (calcState.lastInputWasOperator && !state.isDecimal) {
     state.variableB += ".";
     state.isDecimal = true;
   }
@@ -226,7 +226,7 @@ function handlePlusMinus(state) {
   if (!state.variableA) return;
 
   // When variable A is valid, shift negative or positive depend on user input
-  if (!isOperatorClicked) {
+  if (!calcState.lastInputWasOperator) {
     shiftPositiveNegative(state);
   }
 }

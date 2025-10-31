@@ -165,7 +165,6 @@ function processKey(key, length) {
   console.log(`B: ${calcState.variableB}`);
   console.log(`Current class: ${key.className}`);
   console.log(`isEval: ${calcState.isEvaluated}`);
-  // console.log([...calcState.variableA]);
 }
 
 // ---------- Mathematic function ----------
@@ -175,7 +174,7 @@ function mathCalculation(state, sign) {
     // Runn the calculation depends on the sign being passed on and assign the value to A
     state.variableA = state[sign](+state.variableA, +state.variableB);
     // Reset the state
-    calcState.canEvaluate = false;
+    state.canEvaluate = false;
     state.variableB = "";
     state.isEvaluated = true;
     state.isDecimal = false;
@@ -189,7 +188,7 @@ function nextAction(key, state) {
   // If user presses a number key after evaluation, reassign variableA to a the new value
   if (key.className === "number") state.variableA = key.textContent;
   else if (key.className === "operator") {
-    calcState.lastInputWasOperator = true;
+    state.lastInputWasOperator = true;
     state.isEvaluated = false;
   }
   return state;
@@ -208,15 +207,13 @@ function handleDecimal(state) {
   // If the decimal button is clicked before A was input, return
   if (!state.variableA) return;
 
-  // Do I have to make a flag check? There are already 3 flag check to keep track of
-  // Need to handle cases where user press decimal right after pressing an operator
-  if (!calcState.lastInputWasOperator && !state.isDecimal) {
-    state.variableA += ".";
-    state.isDecimal = true;
-  } else if (calcState.lastInputWasOperator && !state.isDecimal) {
-    state.variableB += ".";
+  if (!state.isDecimal) {
+    // Apply decimal to variable A or B depend on whether an operator was activated
+    if (state.lastInputWasOperator) state.variableB += ".";
+    else state.variableA += ".";
     state.isDecimal = true;
   }
+
   return state;
 }
 
@@ -226,7 +223,7 @@ function handlePlusMinus(state) {
   if (!state.variableA) return;
 
   // When variable A is valid, shift negative or positive depend on user input
-  if (!calcState.lastInputWasOperator) {
+  if (!state.lastInputWasOperator) {
     shiftPositiveNegative(state);
   }
 }

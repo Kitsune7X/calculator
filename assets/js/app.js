@@ -126,6 +126,7 @@ function processKey(key, length) {
       calcState.lastInputWasOperator = true; // Flip state so subsequent digits go to variableB
       sign = key.id; // Remember which operator was chosen for later evaluation
       calcState.isDecimal = false; // Reset decimal state
+      calcState.isNegative = false;
     }
   } else if (
     key.className === "operator" &&
@@ -172,7 +173,10 @@ function processKey(key, length) {
 function mathCalculation(state, sign) {
   if (sign in state) {
     // Runn the calculation depends on the sign being passed on and assign the value to A
-    state.variableA = state[sign](+state.variableA, +state.variableB);
+    state.variableA = state[sign](
+      +state.variableA,
+      +state.variableB
+    ).toString();
     // Reset the state
     state.canEvaluate = false;
     state.variableB = "";
@@ -220,36 +224,35 @@ function handleDecimal(state) {
 // ---------- Plus Minus handling function ----------
 function handlePlusMinus(state) {
   // If the plus minus button was clicked before A was input, return
-  if (!state.variableA) return;
+  if (!state.variableA || +state.variableA === 0) return;
 
-  // When variable A is valid, shift negative or positive depend on user input
-  if (!state.lastInputWasOperator) {
-    shiftPositiveNegative(state);
+  // Handle the result of evaluation
+  if (state.isEvaluated) {
+    if (+state.variableA > 0) state.isNegative = false;
+    else if (+state.variableA < 0) state.isNegative = true;
+    else return;
   }
-}
 
-// ---------- Shift Positive Negative function ----------
-function shiftPositiveNegative(state) {
+  const targetOperand = state.lastInputWasOperator ? "variableB" : "variableA";
   if (!state.isNegative) {
     // Put the methods in separate lines due to unshift and shift return added or removed
     // elements perspectively. No chaining
-    state.variableA = [...state.variableA];
-    state.variableA.unshift("-");
+    state[targetOperand] = [...state[targetOperand]];
+    state[targetOperand].unshift("-");
 
     // Need to reassgin back to variable A due to join() method return a copy
-    state.variableA = state.variableA.join("");
+    state[targetOperand] = state[targetOperand].join("");
 
     state.isNegative = true;
-    return state;
   } else {
-    state.variableA = [...state.variableA];
-    state.variableA.shift();
+    state[targetOperand] = [...state[targetOperand]];
+    state[targetOperand].shift();
 
-    state.variableA = state.variableA.join("");
+    state[targetOperand] = state[targetOperand].join("");
 
     state.isNegative = false;
-    return state;
   }
+  return state;
 }
 
 // Handle decimals as well as long decimals

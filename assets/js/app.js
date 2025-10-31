@@ -65,10 +65,6 @@ buttons.forEach((button) => {
     }
 
     // Extra features:
-    // Clear all
-    if (key.id === "btn-clear-all") {
-      clearAll(calcState);
-    }
   });
 });
 
@@ -160,9 +156,18 @@ function processKey(key, length) {
     handlePlusMinus(calcState);
   }
 
+  // Clear all
+  if (key.id === "btn-clear-all") {
+    clearAll(calcState);
+  }
+
+  if (key.id === "btn-clear") {
+    clearOneByOne(calcState);
+  }
   // Trace the current state so the flow is easy to debug during development.
   console.log(`A: ${calcState.variableA}`);
-  console.log(typeof calcState.variableA);
+  // console.log(typeof calcState.variableA);
+  console.log(sign);
   console.log(`B: ${calcState.variableB}`);
   console.log(`Current class: ${key.className}`);
   console.log(`isEval: ${calcState.isEvaluated}`);
@@ -255,20 +260,15 @@ function handlePlusMinus(state) {
   return state;
 }
 
-// Handle decimals as well as long decimals
-
-// Add Clear all and Clear 1 by 1 function
-
-// Remove Parenthesis function because it seems unecessary
-
-// Add keyboard mapping??????
-
-// Write separate Display render function
-
-// Just console log for now. Display later
-
-// Refactor to just switch state with only isEvaluated
-
-// Render function will be at the end
-
-// Handle divide by 0
+// ---------- Delete One by one function ----------
+function clearOneByOne(state) {
+  if (!state.variableA) return;
+  if (!state.lastInputWasOperator) {
+    state.variableA = [...state.variableA];
+    state.variableA.pop();
+    state.variableA = state.variableA.join("");
+  } else {
+    if (!state.variableB) {
+    }
+  }
+}

@@ -17,13 +17,11 @@ const numberKey = buttons.filter((button) => button.className === "number");
 // Operator buttons trigger the arithmetic function to apply
 const operatorKey = buttons.filter((button) => button.className === "operator");
 
-// Variable to hold the current operator
-let sign = "";
-
 // Operator lookup maps button ids to their corresponding math routine
 const calcState = {
   variableA: "",
   variableB: "",
+  sign: "",
   "btn-plus": (a, b) => +(a + b).toFixed(2),
   "btn-minus": (a, b) => +(a - b).toFixed(2),
   "btn-divide": (a, b) => {
@@ -120,7 +118,7 @@ function processKey(key, length) {
     if (!calcState.variableA) return;
     else {
       calcState.lastInputWasOperator = true; // Flip state so subsequent digits go to variableB
-      sign = key.id; // Remember which operator was chosen for later evaluation
+      calcState.sign = key.id; // Remember which operator was chosen for later evaluation
       calcState.isDecimal = false; // Reset decimal state
       calcState.isNegative = false;
     }
@@ -130,7 +128,8 @@ function processKey(key, length) {
     calcState.canEvaluate
   ) {
     mathCalculation(calcState, sign);
-    sign = key.id;
+    // After calculation, assign that operator to sign for consecutive calculation
+    calcState.sign = key.id;
   }
 
   // 3) "=" finalizes the expression and resets state for whatever comes next.
@@ -139,7 +138,7 @@ function processKey(key, length) {
     if (!calcState.canEvaluate) return;
     // When the expression is valid, fire the math calculation function
     else {
-      mathCalculation(calcState, sign);
+      mathCalculation(calcState);
       sign = "";
       calcState.lastInputWasOperator = false;
       calcState.canEvaluate = false;
@@ -167,7 +166,7 @@ function processKey(key, length) {
   // Trace the current state so the flow is easy to debug during development.
   console.log(`A: ${calcState.variableA}`);
   // console.log(typeof calcState.variableA);
-  console.log(sign);
+  console.log(calcState.sign);
   console.log(`B: ${calcState.variableB}`);
   console.log(`Current class: ${key.className}`);
   console.log(`isEval: ${calcState.isEvaluated}`);
@@ -175,10 +174,10 @@ function processKey(key, length) {
 
 // ---------- Mathematic function ----------
 // Executes the chosen operation, updates the displays, and resets temporary state
-function mathCalculation(state, sign) {
-  if (sign in state) {
+function mathCalculation(state) {
+  if (state.sign in state) {
     // Runn the calculation depends on the sign being passed on and assign the value to A
-    state.variableA = state[sign](
+    state.variableA = state[state.sign](
       +state.variableA,
       +state.variableB
     ).toString();

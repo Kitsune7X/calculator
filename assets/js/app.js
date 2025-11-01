@@ -7,10 +7,6 @@ const MAX_LENGTH = 11;
 // Collect all calculator buttons once so listeners can be attached in bulk
 const buttons = Array.from(document.querySelectorAll("button"));
 
-// References to the display rows that show the current and historical input
-const displayTop = document.querySelector("#calculator-display-row-top");
-const displayBottom = document.querySelector("#calculator-display-row-bottom");
-
 // Number buttons used for building operands digit by digit
 const numberKey = buttons.filter((button) => button.className === "number");
 
@@ -47,7 +43,13 @@ buttons.forEach((button) => {
   button.addEventListener("click", (e) => {
     const key = e.target;
 
-    console.log(key);
+    // References to the display rows that show the current and historical input
+    const displayTop = document.querySelector("#calculator-display-row-top");
+    const displayBottom = document.querySelector(
+      "#calculator-display-row-bottom"
+    );
+
+    // console.log(key);
     // Step 1: deliver audio feedback so the button feels instant.
     audio();
     // Step 2: optional mute toggle happens independently of the math flow.
@@ -65,6 +67,9 @@ buttons.forEach((button) => {
     if (calcState.isEvaluated) {
       nextAction(key, calcState);
     }
+
+    // Render to display
+    render(key, calcState, displayTop, displayBottom);
   });
 });
 
@@ -280,5 +285,15 @@ function clearOneByOne(state) {
       state.variableB.pop();
       state.variableB = state.variableB.join("");
     }
+  }
+}
+
+// ---------- Render function ----------
+function render(key, state, top, bottom) {
+  if (!state.lastInputWasOperator) {
+    bottom.textContent = `${state.variableA}`;
+  } else {
+    top.textContent = `${state.variableA}`;
+    bottom.textContent = `${state.variableB}`;
   }
 }

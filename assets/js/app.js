@@ -173,7 +173,7 @@ function processKey(key, length) {
     clearOneByOne(calcState);
   }
   // Trace the current state so the flow is easy to debug during development.
-  // console.log(`A: ${calcState.variableA}`);
+  console.log(`A: ${calcState.variableA}`);
   // console.log(typeof calcState.variableA);
   // console.log(calcState.sign);
   // console.log(`B: ${calcState.variableB}`);
@@ -223,6 +223,9 @@ function clearAll(state) {
 function handleDecimal(state) {
   // If the decimal button is clicked before A was input, return
   if (!state.variableA) return;
+
+  // When the result of a calculation is a float with decimal, return
+  if (!Number.isInteger(+state.variableA)) return;
 
   if (!state.isDecimal) {
     // Apply decimal to variable A or B depend on whether an operator was activated
@@ -291,16 +294,16 @@ function clearOneByOne(state) {
 
 // ---------- Render function ----------
 function render(key, state, top, bottom) {
-  const previousB = bottom.textContent;
   if (!state.lastInputWasOperator) {
     bottom.textContent = `${state.variableA}`;
   } else {
     const operator = document.getElementById(state.sign);
-    top.textContent = `${state.variableA}${operator.textContent}`;
-    bottom.textContent = `${state.variableB}`;
+    top.textContent = `${state.variableA}${operator.textContent}${state.variableB}`;
+    bottom.textContent = "ᓚᘏᗢ";
   }
 
   if (state.isEvaluated) {
-    top.textContent += `${previousB}`;
+    bottom.textContent = `${state.variableA}`;
   }
+  // if (key.id === "btn-equal") top.textContent += ``;
 }

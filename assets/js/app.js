@@ -119,6 +119,7 @@ function processKey(key, length) {
   } else if (key.className === "number" && calcState.isEvaluated) {
     calcState.variableA = key.textContent;
     calcState.isEvaluated = false;
+    calcState.isDecimal = false;
   }
 
   // 2) Operators capture pending operations or trigger chained evaluations.
@@ -174,7 +175,7 @@ function processKey(key, length) {
   }
   // Trace the current state so the flow is easy to debug during development.
   console.log(`A: ${calcState.variableA}`);
-  // console.log(typeof calcState.variableA);
+  console.log(typeof calcState.variableA);
   // console.log(calcState.sign);
   // console.log(`B: ${calcState.variableB}`);
   // console.log(`Current class: ${key.className}`);
@@ -191,11 +192,13 @@ function mathCalculation(state) {
     // When the result of calculation is valid (not divide by 0), convert it to Str
     if (state.variableA) state.variableA = state.variableA.toString();
     else state.variableA = "÷ 0 = +_+";
+    renderCurrent(state);
     // Reset the state
     state.canEvaluate = false;
     state.variableB = "";
     state.isEvaluated = true;
-    state.isDecimal = false;
+    if (Number.isInteger(+state.variableA)) state.isDecimal = false;
+    else state.isDecimal = true;
   }
   return state;
 }
@@ -226,7 +229,9 @@ function handleDecimal(state) {
   if (!state.variableA) return;
 
   // When the result of a calculation is a float with decimal, return
-  if (!Number.isInteger(+state.variableA)) return;
+  // if (!Number.isInteger(+state.variableA)) return;
+  // Handle result after calculation
+  if (state.isEvaluated) state.isEvaluated = false;
 
   if (!state.isDecimal) {
     // Apply decimal to variable A or B depend on whether an operator was activated
@@ -295,27 +300,20 @@ function clearOneByOne(state) {
 
 // ---------- Render function ----------
 function render(key, state, top, bottom) {
-  // if (!state.lastInputWasOperator) {
-  //   if (key.id === "btn-clear") {
-  //     if (top.textContent) top.textContent = `${state.variableA}`;
-  //     else if (!top.textContent) bottom.textContent = `${state.variableA}`;
-  //   } else top.textContent = `${state.variableA}`;
-  // } else {
-  //   const operator = document.getElementById(state.sign);
-  //   top.textContent = `${state.variableA}${operator.textContent}${state.variableB}`;
-  //   bottom.textContent = "";
-  // }
-  // const operator = document.getElementById(state.sign);
-  // if (!operator) top.textContent = `${state.variableA}`;
-
-  if (state.isEvaluated) {
-    bottom.textContent = `${state.variableA}`;
-  }
-
   if (key.id === "btn-clear-all") {
     top.textContent = "";
     bottom.textContent = "";
   }
+
+  if (key.id === "btn-plus-minus") {
+    top.textContent = `${state.variableA}`;
+    bottom.textContent = `${state.variableB}`;
+  }
+  if (state.isEvaluated) return;
+  const operator = document.getElementById(state.sign);
+  if (!operator) top.textContent = `${state.variableA}`;
+  else
+    top.textContent = `${state.variableA}${operator.textContent}${state.variableB}`;
 }
 
 // ---------- Render previous math expression ----------
@@ -323,4 +321,9 @@ function renderPrevious(state) {
   const top = document.querySelector("#calculator-display-row-top");
   const operator = document.getElementById(state.sign);
   return (top.textContent = `${state.variableA}${operator.textContent}${state.variableB}=`);
+}
+
+function renderCurrent(state) {
+  const bottom = document.querySelector("#calculator-display-row-bottom");
+  return (bottom.textContent = `${state.variableA}`);
 }

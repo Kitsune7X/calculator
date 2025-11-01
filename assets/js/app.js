@@ -185,6 +185,7 @@ function processKey(key, length) {
 // Executes the chosen operation, updates the displays, and resets temporary state
 function mathCalculation(state) {
   if (state.sign in state) {
+    renderPrevious(state);
     // Runn the calculation depends on the sign being passed on and assign the value to A
     state.variableA = state[state.sign](+state.variableA, +state.variableB);
     // When the result of calculation is valid (not divide by 0), convert it to Str
@@ -294,13 +295,18 @@ function clearOneByOne(state) {
 
 // ---------- Render function ----------
 function render(key, state, top, bottom) {
-  if (!state.lastInputWasOperator) {
-    bottom.textContent = `${state.variableA}`;
-  } else {
-    const operator = document.getElementById(state.sign);
-    top.textContent = `${state.variableA}${operator.textContent}${state.variableB}`;
-    bottom.textContent = "";
-  }
+  // if (!state.lastInputWasOperator) {
+  //   if (key.id === "btn-clear") {
+  //     if (top.textContent) top.textContent = `${state.variableA}`;
+  //     else if (!top.textContent) bottom.textContent = `${state.variableA}`;
+  //   } else top.textContent = `${state.variableA}`;
+  // } else {
+  //   const operator = document.getElementById(state.sign);
+  //   top.textContent = `${state.variableA}${operator.textContent}${state.variableB}`;
+  //   bottom.textContent = "";
+  // }
+  // const operator = document.getElementById(state.sign);
+  // if (!operator) top.textContent = `${state.variableA}`;
 
   if (state.isEvaluated) {
     bottom.textContent = `${state.variableA}`;
@@ -310,4 +316,11 @@ function render(key, state, top, bottom) {
     top.textContent = "";
     bottom.textContent = "";
   }
+}
+
+// ---------- Render previous math expression ----------
+function renderPrevious(state) {
+  const top = document.querySelector("#calculator-display-row-top");
+  const operator = document.getElementById(state.sign);
+  return (top.textContent = `${state.variableA}${operator.textContent}${state.variableB}=`);
 }

@@ -1,13 +1,14 @@
-// -------------------------------
-// Variable Declaration
-// -------------------------------
+// ==============================
+// * Global Variables — START
+// ==============================
+
 // Max length of digits allowed on the display
 const MAX_LENGTH = 17;
 
 // Collect all calculator buttons once so listeners can be attached in bulk
 const buttons = Array.from(document.querySelectorAll("button"));
 
-// Operator lookup maps button ids to their corresponding math routine
+// Calculation State object that determine the state of the script
 const calcState = {
   variableA: "",
   variableB: "",
@@ -26,13 +27,16 @@ const calcState = {
   isNegative: false,
 };
 
+// ==============================
+// * Global Variables — END
+// ==============================
+
 // Flow overview: bind DOM/state, listen for user input, funnel it through the
 // handlers below, and reuse nextAction to chain calculations.
 
-// -------------------------------
-// Main
-// -------------------------------
-
+// ==============================
+// * Main — START
+// ==============================
 // Attach a click handler to every calculator button to orchestrate the UI flow
 buttons.forEach((button) => {
   button.addEventListener("click", (e) => {
@@ -44,32 +48,41 @@ buttons.forEach((button) => {
       "#calculator-display-row-bottom"
     );
 
-    // Step 1: deliver audio feedback so the button feels instant.
+    // ---------- Audio Handling - START ----------
     audio();
-    // Step 2: optional mute toggle happens independently of the math flow.
+    // Optional mute toggle happens independently of the math flow.
     if (
       key.id === "btn-sound-switch" ||
       key.parentElement.id === "btn-sound-switch"
     ) {
       mute();
     }
+    // ---------- Audio Handling - END ----------
 
-    // Step 3: process the key to mutate operands and pending operators.
+    // ---------- Process Key - START ----------
+    // Main function to handle most of the functionalities of the app
     processKey(key, displayTop.textContent.length);
 
-    // Step 4: if a result was just produced, hand off to nextAction for chaining.
+    // If a result was just produced, hand off to nextAction for chaining.
     if (calcState.isEvaluated) {
       nextAction(key, calcState);
     }
 
-    // Render to display
+    // ---------- Process Key - END ----------
+
+    // ---------- Render to Display - START ----------
     render(key, calcState, displayTop, displayBottom);
+    // ---------- Render to Display - END ----------
   });
 });
 
-// -------------------------------
-// Helper functions
-// -------------------------------
+// ==============================
+// * Main — END
+// ==============================
+
+// ==============================
+// * Functions — START
+// ==============================
 
 // ---------- Play audio function ----------
 // Provides instant tactile feedback on every button press
@@ -128,7 +141,7 @@ function processKey(key, length) {
   } else if (
     key.className === "operator" &&
     calcState.lastInputWasOperator &&
-    calcState.canEvaluate
+    calcState.canEvaluate // Flag check to prevent user from trying to calculate without variable B
   ) {
     mathCalculation(calcState);
     // After calculation, assign that operator to sign for consecutive calculation
@@ -184,7 +197,7 @@ function mathCalculation(state) {
     state.variableA = state[state.sign](+state.variableA, +state.variableB);
     // When the result of calculation is valid (not divide by 0), convert it to Str
     if (state.variableA) state.variableA = state.variableA.toString();
-    else state.variableA = "÷ 0 = +_+";
+    else state.variableA = "(˘･_･˘)";
     renderCurrent(state);
     // Reset the state
     state.canEvaluate = false;
@@ -324,3 +337,7 @@ function renderCurrent(state) {
   const bottom = document.querySelector("#calculator-display-row-bottom");
   return (bottom.textContent = `${state.variableA}`);
 }
+
+// ==============================
+// * Functions — END
+// ==============================

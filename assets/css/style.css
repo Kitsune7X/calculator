@@ -16,6 +16,13 @@
   font-style: normal;
 }
 
+.jetbrains-mono-medium {
+  font-family: "JetBrains Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
 html,
 body {
   width: 100%;
@@ -46,7 +53,7 @@ button {
   background: none;
   border: none;
   cursor: pointer;
-  font-family: "Google Sans Code", monospace;
+  font-family: "JetBrains Mono", monospace;
   font-size: 1.4rem;
 }
 

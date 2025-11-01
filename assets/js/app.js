@@ -21,8 +21,9 @@ const calcState = {
   "btn-plus": (a, b) => +(a + b).toFixed(2),
   "btn-minus": (a, b) => +(a - b).toFixed(2),
   "btn-divide": (a, b) => {
-    +b === 0 ? "Can't divide by 0" : +(a / b).toFixed(2); // Handle infinity decimal
-  },
+    if (+b === 0) return;
+    return +(a / b).toFixed(2);
+  }, // Handle infinity decimal
   "btn-multiply": (a, b) => +(a * b).toFixed(2),
   lastInputWasOperator: false,
   canEvaluate: false,
@@ -147,7 +148,7 @@ function processKey(key, length) {
     // When the expression is valid, fire the math calculation function
     else {
       mathCalculation(calcState);
-      sign = "";
+      calcState.sign = "";
       calcState.lastInputWasOperator = false;
       calcState.canEvaluate = false;
     }
@@ -172,12 +173,12 @@ function processKey(key, length) {
     clearOneByOne(calcState);
   }
   // Trace the current state so the flow is easy to debug during development.
-  console.log(`A: ${calcState.variableA}`);
+  // console.log(`A: ${calcState.variableA}`);
   // console.log(typeof calcState.variableA);
-  console.log(calcState.sign);
-  console.log(`B: ${calcState.variableB}`);
-  console.log(`Current class: ${key.className}`);
-  console.log(`isEval: ${calcState.isEvaluated}`);
+  // console.log(calcState.sign);
+  // console.log(`B: ${calcState.variableB}`);
+  // console.log(`Current class: ${key.className}`);
+  // console.log(`isEval: ${calcState.isEvaluated}`);
 }
 
 // ---------- Mathematic function ----------
@@ -185,10 +186,10 @@ function processKey(key, length) {
 function mathCalculation(state) {
   if (state.sign in state) {
     // Runn the calculation depends on the sign being passed on and assign the value to A
-    state.variableA = state[state.sign](
-      +state.variableA,
-      +state.variableB
-    ).toString();
+    state.variableA = state[state.sign](+state.variableA, +state.variableB);
+    // When the result of calculation is valid (not divide by 0), convert it to Str
+    if (state.variableA) state.variableA = state.variableA.toString();
+    else state.variableA = "÷ 0 = +_+";
     // Reset the state
     state.canEvaluate = false;
     state.variableB = "";
@@ -290,10 +291,16 @@ function clearOneByOne(state) {
 
 // ---------- Render function ----------
 function render(key, state, top, bottom) {
+  const previousB = bottom.textContent;
   if (!state.lastInputWasOperator) {
     bottom.textContent = `${state.variableA}`;
   } else {
-    top.textContent = `${state.variableA}`;
+    const operator = document.getElementById(state.sign);
+    top.textContent = `${state.variableA}${operator.textContent}`;
     bottom.textContent = `${state.variableB}`;
+  }
+
+  if (state.isEvaluated) {
+    top.textContent += `${previousB}`;
   }
 }

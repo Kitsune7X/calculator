@@ -15,10 +15,10 @@ const calcState = {
   sign: "",
   "btn-plus": (a, b) => +(a + b).toFixed(2),
   "btn-minus": (a, b) => +(a - b).toFixed(2),
-  "btn-divide": (a, b) => {
-    if (+b === 0) return;
-    return +(a / b).toFixed(2);
-  }, // Handle infinity decimal
+  "btn-divide": (a, b) =>
+    +b === 0
+      ? (variableA = "(˘･_･˘)") // Handle infinity decimal
+      : +(a / b).toFixed(2),
   "btn-multiply": (a, b) => +(a * b).toFixed(2),
   lastInputWasOperator: false,
   canEvaluate: false,
@@ -196,8 +196,8 @@ function mathCalculation(state) {
     // Runn the calculation depends on the sign being passed on and assign the value to A
     state.variableA = state[state.sign](+state.variableA, +state.variableB);
     // When the result of calculation is valid (not divide by 0), convert it to Str
-    if (state.variableA) state.variableA = state.variableA.toString();
-    else state.variableA = "(˘･_･˘)";
+    state.variableA = state.variableA.toString();
+
     renderCurrent(state);
     // Reset the state
     state.canEvaluate = false;

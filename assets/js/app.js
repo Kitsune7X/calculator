@@ -113,19 +113,13 @@ function processKey(key, length) {
   // Using <= would allow one extra digit (overflow by one).
   if (key.className === "number" && !(length < MAX_LENGTH)) return;
 
-  // 1) Numbers either build the current operand or reset after a completed expression.
+  // Numbers either build the current operand or reset after a completed expression.
+  // Build operand case
   if (key.className === "number" && !calcState.isEvaluated) {
-    // Assign value to variable A or B depend on whether operator is clicked
-    const targetOperand = calcState.lastInputWasOperator
-      ? "variableB"
-      : "variableA";
-    calcState[targetOperand] += key.textContent;
-
-    if (calcState.lastInputWasOperator) calcState.canEvaluate = true;
+    assignVariable(calcState, key);
+    // Reset after a completed evaluation
   } else if (key.className === "number" && calcState.isEvaluated) {
-    calcState.variableA = key.textContent;
-    calcState.isEvaluated = false;
-    calcState.isDecimal = false;
+    resetState(calcState, key);
   }
 
   // 2) Operators capture pending operations or trigger chained evaluations.
@@ -186,6 +180,25 @@ function processKey(key, length) {
   // console.log(`B: ${calcState.variableB}`);
   // console.log(`Current class: ${key.className}`);
   // console.log(`isEval: ${calcState.isEvaluated}`);
+}
+
+// ---------- Assign variables function ----------
+function assignVariable(state, key) {
+  // Assign value to variable A or B depend on whether operator is clicked
+  const targetOperand = state.lastInputWasOperator ? "variableB" : "variableA";
+  state[targetOperand] += key.textContent;
+
+  if (state.lastInputWasOperator) state.canEvaluate = true;
+
+  return state;
+}
+
+// ---------- Resiet state function ----------
+function resetState(state, key) {
+  state.variableA = key.textContent;
+  state.isEvaluated = false;
+  state.isDecimal = false;
+  return state;
 }
 
 // ---------- Mathematic function ----------

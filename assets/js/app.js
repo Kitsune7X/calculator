@@ -299,11 +299,15 @@ function render(key, state, top, bottom) {
   } else {
     const operator = document.getElementById(state.sign);
     top.textContent = `${state.variableA}${operator.textContent}${state.variableB}`;
-    bottom.textContent = "ᓚᘏᗢ";
+    bottom.textContent = "";
   }
 
   if (state.isEvaluated) {
     bottom.textContent = `${state.variableA}`;
   }
-  // if (key.id === "btn-equal") top.textContent += ``;
+
+  if (key.id === "btn-clear-all") {
+    top.textContent = "";
+    bottom.textContent = "";
+  }
 }

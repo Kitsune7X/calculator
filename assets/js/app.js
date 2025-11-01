@@ -113,16 +113,18 @@ function processKey(key, length) {
   // Using <= would allow one extra digit (overflow by one).
   if (key.className === "number" && !(length < MAX_LENGTH)) return;
 
+  // Handle Number keys
   // Numbers either build the current operand or reset after a completed expression.
-  // Build operand case
-  if (key.className === "number" && !calcState.isEvaluated) {
-    assignVariable(calcState, key);
-    // Reset after a completed evaluation
-  } else if (key.className === "number" && calcState.isEvaluated) {
-    resetState(calcState, key);
-  }
 
-  // 2) Operators capture pending operations or trigger chained evaluations.
+  if (key.className === "number")
+    !calcState.isEvaluated
+      ? // Build operand case
+        assignVariable(calcState, key)
+      : // Reset after a completed evaluation
+        resetState(calcState, key);
+
+  // Handle Operator keys
+  // Operators capture pending operations or trigger chained evaluations.
   if (key.className === "operator" && !calcState.lastInputWasOperator) {
     // Prevent user from using operator before inputting any value
     if (!calcState.variableA) return;
@@ -130,7 +132,7 @@ function processKey(key, length) {
       calcState.lastInputWasOperator = true; // Flip state so subsequent digits go to variableB
       calcState.sign = key.id; // Remember which operator was chosen for later evaluation
       calcState.isDecimal = false; // Reset decimal state
-      calcState.isNegative = false;
+      calcState.isNegative = false; // Reset Negative State
     }
   } else if (
     key.className === "operator" &&

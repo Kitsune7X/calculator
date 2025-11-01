@@ -2,16 +2,10 @@
 // Variable Declaration
 // -------------------------------
 // Max length of digits allowed on the display
-const MAX_LENGTH = 11;
+const MAX_LENGTH = 17;
 
 // Collect all calculator buttons once so listeners can be attached in bulk
 const buttons = Array.from(document.querySelectorAll("button"));
-
-// Number buttons used for building operands digit by digit
-const numberKey = buttons.filter((button) => button.className === "number");
-
-// Operator buttons trigger the arithmetic function to apply
-const operatorKey = buttons.filter((button) => button.className === "operator");
 
 // Operator lookup maps button ids to their corresponding math routine
 const calcState = {
@@ -50,7 +44,6 @@ buttons.forEach((button) => {
       "#calculator-display-row-bottom"
     );
 
-    // console.log(key);
     // Step 1: deliver audio feedback so the button feels instant.
     audio();
     // Step 2: optional mute toggle happens independently of the math flow.
@@ -62,7 +55,7 @@ buttons.forEach((button) => {
     }
 
     // Step 3: process the key to mutate operands and pending operators.
-    processKey(key, displayBottom.textContent.length);
+    processKey(key, displayTop.textContent.length);
 
     // Step 4: if a result was just produced, hand off to nextAction for chaining.
     if (calcState.isEvaluated) {
@@ -309,6 +302,10 @@ function render(key, state, top, bottom) {
     top.textContent = `${state.variableA}`;
     bottom.textContent = `${state.variableB}`;
   }
+
+  // if (key.id === "btn-decimal") {
+  //   bottom.textContent = "";
+  // }
   if (state.isEvaluated) return;
   const operator = document.getElementById(state.sign);
   if (!operator) top.textContent = `${state.variableA}`;

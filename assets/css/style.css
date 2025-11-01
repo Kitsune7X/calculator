@@ -96,12 +96,13 @@ button {
 }
 
 #btn-sound-switch {
-  background-color: #000;
-  font-size: 1.2rem;
-  color: #f6f6f6;
-  width: 4rem;
-  padding: 0.2rem 0;
-  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#btn-sound-switch img {
+  width: 40%;
+  height: auto;
 }
 /* ---------- Logo — END ---------- */
 
@@ -161,7 +162,6 @@ button {
 
 /* ---------- Operators key — START ---------- */
 
-#btn-parenthesis-open,
 #btn-plus-minus,
 #btn-clear-all,
 #btn-clear,
@@ -174,8 +174,14 @@ button {
 
 /* ---------- Operators key — END ---------- */
 
-#btn-equal {
+#btn-equal,
+#btn-sound-switch {
   background-color: #cfffe2;
+}
+
+button:active {
+  transform: scale(0.91);
+  transition: 0.1s;
 }
 
 /* ---------- Keypad — END ---------- */

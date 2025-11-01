@@ -47,11 +47,15 @@ buttons.forEach((button) => {
   button.addEventListener("click", (e) => {
     const key = e.target;
 
+    console.log(key);
     // Step 1: deliver audio feedback so the button feels instant.
     audio();
     // Step 2: optional mute toggle happens independently of the math flow.
-    if (key.id === "btn-sound-switch") {
-      mute(key);
+    if (
+      key.id === "btn-sound-switch" ||
+      key.parentElement.id === "btn-sound-switch"
+    ) {
+      mute();
     }
 
     // Step 3: process the key to mutate operands and pending operators.
@@ -61,8 +65,6 @@ buttons.forEach((button) => {
     if (calcState.isEvaluated) {
       nextAction(key, calcState);
     }
-
-    // Extra features:
   });
 });
 
@@ -80,14 +82,15 @@ function audio() {
 
 // ---------- Mute audio function ----------
 // Toggle button sound on/off and update the toggle label
-function mute(target) {
+function mute() {
   const audio = document.querySelector("#btn-audio");
+  const musicNote = document.querySelector("#btn-sound-switch img");
   if (audio.muted) {
     audio.muted = false;
-    target.textContent = "ON";
+    musicNote.setAttribute("src", "./assets/images/music_on.svg");
   } else {
     audio.muted = true;
-    target.textContent = "OFF";
+    musicNote.setAttribute("src", "./assets/images/music_off.svg");
   }
 }
 
@@ -127,7 +130,7 @@ function processKey(key, length) {
     calcState.lastInputWasOperator &&
     calcState.canEvaluate
   ) {
-    mathCalculation(calcState, sign);
+    mathCalculation(calcState);
     // After calculation, assign that operator to sign for consecutive calculation
     calcState.sign = key.id;
   }
@@ -262,12 +265,20 @@ function handlePlusMinus(state) {
 // ---------- Delete One by one function ----------
 function clearOneByOne(state) {
   if (!state.variableA) return;
+
+  // Clear one by one based on what being input
   if (!state.lastInputWasOperator) {
     state.variableA = [...state.variableA];
     state.variableA.pop();
     state.variableA = state.variableA.join("");
   } else {
     if (!state.variableB) {
+      state.sign = "";
+      state.lastInputWasOperator = false;
+    } else {
+      state.variableB = [...state.variableB];
+      state.variableB.pop();
+      state.variableB = state.variableB.join("");
     }
   }
 }

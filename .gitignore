@@ -1,5 +1,2 @@
 # Ignore temp folder
 temp/
-
-# Ignore test script
-*test.js

@@ -47,6 +47,7 @@ const keyMap = {
   Backspace: "btn-clear",
   Escape: "btn-clear-all",
   Enter: "btn-equal",
+  Shift: "btn-plus-minus",
 };
 
 // ==============================

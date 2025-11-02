@@ -29,9 +29,24 @@ const calcState = {
 
 // Keyboard Mapping object
 const keyMap = {
+  0: "btn-0",
   1: "btn-1",
   2: "btn-2",
   3: "btn-3",
+  4: "btn-4",
+  5: "btn-5",
+  6: "btn-6",
+  7: "btn-7",
+  8: "btn-8",
+  9: "btn-9",
+  "+": "btn-plus",
+  "-": "btn-minus",
+  "/": "btn-divide",
+  "*": "btn-multiply",
+  ".": "btn-decimal",
+  Backspace: "btn-clear",
+  Escape: "btn-clear-all",
+  Enter: "btn-equal",
 };
 
 // ==============================
@@ -48,8 +63,6 @@ const keyMap = {
 buttons.forEach((button) => {
   button.addEventListener("click", (e) => {
     const key = e.target;
-    console.log(key);
-    console.log(typeof key);
 
     // References to the display rows that show the current and historical input
     const displayTop = document.querySelector("#calculator-display-row-top");
@@ -88,13 +101,40 @@ buttons.forEach((button) => {
 // ---------- Keyboard support ----------
 window.addEventListener("keydown", (e) => {
   e.preventDefault();
-  console.log(e.key);
-  console.log(typeof e.key);
+
+  // If the pressed key in keyMap, assign that corresponding object to the key
   if (e.key in keyMap) {
-    console.log(keyMap[e.key]);
     const key = document.getElementById(keyMap[e.key]);
-    console.log(key);
-    console.log(typeof key);
+
+    const displayTop = document.querySelector("#calculator-display-row-top");
+    const displayBottom = document.querySelector(
+      "#calculator-display-row-bottom"
+    );
+    // ---------- Audio Handling - START ----------
+    audio();
+    // Optional mute toggle happens independently of the math flow.
+    if (
+      key.id === "btn-sound-switch" ||
+      key.parentElement.id === "btn-sound-switch"
+    ) {
+      mute();
+    }
+    // ---------- Audio Handling - END ----------
+
+    // ---------- Process Key - START ----------
+    // Main function to handle most of the functionalities of the app
+    processKey(key, displayTop.textContent.length);
+
+    // If a result was just produced, hand off to nextAction for chaining.
+    if (calcState.isEvaluated) {
+      nextAction(key, calcState);
+    }
+
+    // ---------- Process Key - END ----------
+
+    // ---------- Render to Display - START ----------
+    render(key, calcState, displayTop, displayBottom);
+    // ---------- Render to Display - END ----------
   }
 });
 

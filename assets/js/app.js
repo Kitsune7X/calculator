@@ -48,6 +48,7 @@ const keyMap = {
   Escape: "btn-clear-all",
   Enter: "btn-equal",
   Shift: "btn-plus-minus",
+  Control: "btn-sound-switch",
 };
 
 // ==============================

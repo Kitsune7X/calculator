@@ -280,33 +280,39 @@ function handleDecimal(state) {
 
 // ---------- Plus Minus handling function ----------
 function handlePlusMinus(state) {
-  // If the plus minus button was clicked before A was input, return
+  // Guard: ignore +/- if A is empty or zero (no sign change to apply)
   if (!state.variableA || +state.variableA === 0) return;
 
-  // Handle the result of evaluation
+  // If the last action was evaluation, sync isNegative with the current value.
+  // Positive => not negative, negative => is negative, zero => nothing to do.
   if (state.isEvaluated) {
     if (+state.variableA > 0) state.isNegative = false;
     else if (+state.variableA < 0) state.isNegative = true;
     else return;
   }
 
+  // Decide which operand to toggle based on whether an operator was just entered
   const targetOperand = state.lastInputWasOperator ? "variableB" : "variableA";
   if (!state.isNegative) {
-    // Put the methods in separate lines due to unshift and shift return added or removed
-    // elements perspectively. No chaining
+    // Currently positive => add a leading '-' to make it negative.
+    // Convert to array to easily add/remove the first character.
     state[targetOperand] = [...state[targetOperand]];
     state[targetOperand].unshift("-");
 
-    // Need to reassgin back to variable A due to join() method return a copy
+    // Join back to string (join returns a new string, so reassign)
     state[targetOperand] = state[targetOperand].join("");
 
+    // Track negative state
     state.isNegative = true;
   } else {
+    // Currently negative => remove the leading '-' to make it positive.
     state[targetOperand] = [...state[targetOperand]];
     state[targetOperand].shift();
 
+    // Join back to string
     state[targetOperand] = state[targetOperand].join("");
 
+    // Track positive state
     state.isNegative = false;
   }
   return state;
@@ -345,8 +351,11 @@ function render(key, state, top, bottom) {
     bottom.textContent = `${state.variableB}`;
   }
 
+  // When evaluated, use renderPrevious and renderCurrent inside mathCalculation instead
   if (state.isEvaluated) return;
-  const operator = document.getElementById(state.sign);
+  // When state.sign is truthy, assign it to `operator` variable
+  const operator = state.sign ? document.getElementById(state.sign) : null;
+  // When there is no operator, just display variable A
   if (!operator) top.textContent = `${state.variableA}`;
   else
     top.textContent = `${state.variableA}${operator.textContent}${state.variableB}`;
@@ -359,6 +368,7 @@ function renderPrevious(state) {
   return (top.textContent = `${state.variableA}${operator.textContent}${state.variableB}=`);
 }
 
+// ---------- Render current state function ----------
 function renderCurrent(state) {
   const bottom = document.querySelector("#calculator-display-row-bottom");
   return (bottom.textContent = `${state.variableA}`);

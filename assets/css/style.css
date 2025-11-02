@@ -90,11 +90,11 @@ button {
     border-radius: 0;
     border-top: 3px solid #000;
     border-bottom: 3px solid #000;
-    height: 37rem;
+    height: 33rem;
   }
 
   #cat {
-    top: -16%;
+    top: -18%;
   }
 }
 
@@ -153,6 +153,10 @@ button {
 }
 
 @media screen and (width <= 480px) {
+  #calculator-display {
+    height: 12rem;
+  }
+
   #calculator-display-row-top {
     font-size: 1.6rem;
   }

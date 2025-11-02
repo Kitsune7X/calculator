@@ -27,6 +27,13 @@ const calcState = {
   isNegative: false,
 };
 
+// Keyboard Mapping object
+const keyMap = {
+  1: "btn-1",
+  2: "btn-2",
+  3: "btn-3",
+};
+
 // ==============================
 // * Global Variables — END
 // ==============================
@@ -41,6 +48,8 @@ const calcState = {
 buttons.forEach((button) => {
   button.addEventListener("click", (e) => {
     const key = e.target;
+    console.log(key);
+    console.log(typeof key);
 
     // References to the display rows that show the current and historical input
     const displayTop = document.querySelector("#calculator-display-row-top");
@@ -74,6 +83,19 @@ buttons.forEach((button) => {
     render(key, calcState, displayTop, displayBottom);
     // ---------- Render to Display - END ----------
   });
+});
+
+// ---------- Keyboard support ----------
+window.addEventListener("keydown", (e) => {
+  e.preventDefault();
+  console.log(e.key);
+  console.log(typeof e.key);
+  if (e.key in keyMap) {
+    console.log(keyMap[e.key]);
+    const key = document.getElementById(keyMap[e.key]);
+    console.log(key);
+    console.log(typeof key);
+  }
 });
 
 // ==============================

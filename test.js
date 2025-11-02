@@ -1,6 +1,5 @@
-console.log("Here!");
-const a = 7;
-const b = 3;
-// const operator = "/";
-
-// console.log(a operator b);
+window.addEventListener("keydown", (e) => {
+  e.preventDefault();
+  console.log(e.key);
+  console.log(e.code);
+});

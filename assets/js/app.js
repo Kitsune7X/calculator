@@ -129,19 +129,15 @@ function processKey(key, length) {
     // Prevent user from using operator before inputting any value
     if (!calcState.variableA) return;
     else {
-      calcState.lastInputWasOperator = true; // Flip state so subsequent digits go to variableB
-      calcState.sign = key.id; // Remember which operator was chosen for later evaluation
-      calcState.isDecimal = false; // Reset decimal state
-      calcState.isNegative = false; // Reset Negative State
+      // Soft reset Calculation State after an operator was input
+      softReset(calcState, key);
     }
   } else if (
     key.className === "operator" &&
     calcState.lastInputWasOperator &&
     calcState.canEvaluate // Flag check to prevent user from trying to calculate without variable B
   ) {
-    mathCalculation(calcState);
-    // After calculation, assign that operator to sign for consecutive calculation
-    calcState.sign = key.id;
+    consecutiveCalculation(calcState, key);
   }
 
   // 3) "=" finalizes the expression and resets state for whatever comes next.
@@ -201,6 +197,22 @@ function resetState(state, key) {
   state.isEvaluated = false;
   state.isDecimal = false;
   return state;
+}
+
+// ---------- Soft reset function ----------
+function softReset(state, key) {
+  calcState.lastInputWasOperator = true; // Flip state so subsequent digits go to variableB
+  calcState.sign = key.id; // Remember which operator was chosen for later evaluation
+  calcState.isDecimal = false; // Reset decimal state
+  calcState.isNegative = false; // Reset Negative State
+  return state;
+}
+
+// ---------- Consecutive calculation function ----------
+function consecutiveCalculation(state, key) {
+  mathCalculation(state);
+  // After calculation, assign that operator to sign for consecutive calculation
+  state.sign = key.id;
 }
 
 // ---------- Mathematic function ----------

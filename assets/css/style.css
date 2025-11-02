@@ -64,7 +64,7 @@ button {
 
 #calculator-wrapper {
   width: 25rem;
-  height: 35rem;
+  height: 33rem;
   border: 3px solid #000000;
   border-radius: 2rem;
   display: flex;
@@ -72,11 +72,29 @@ button {
   padding: 1.3rem 1rem 2rem 1rem;
   justify-content: flex-start;
   gap: 1rem;
+  position: relative;
+}
+
+/* Cat */
+#cat {
+  position: absolute;
+  top: -18%;
+  right: 0;
+  width: 50%;
 }
 
 @media screen and (width <= 480px) {
   #calculator-wrapper {
-    width: 90%;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    border-top: 3px solid #000;
+    border-bottom: 3px solid #000;
+    height: 37rem;
+  }
+
+  #cat {
+    top: -16%;
   }
 }
 
@@ -113,7 +131,7 @@ button {
   border: 3.5px solid #000;
   border-radius: 0.5rem;
   width: 100%;
-  height: 20rem;
+  height: 17rem;
   background-color: #cfffe2;
   align-items: flex-end;
   padding: 1.3rem 1.2rem 0.5rem 1.2rem;
@@ -123,17 +141,26 @@ button {
 }
 
 #calculator-display-row-top {
-  font-size: 2rem;
+  font-size: 1.8rem;
   color: #0d5e51;
 }
 
 #calculator-display-row-bottom {
-  font-size: 3rem;
+  font-size: 2.6rem;
   font-weight: 500;
   max-width: 100%;
   overflow: hidden;
 }
 
+@media screen and (width <= 480px) {
+  #calculator-display-row-top {
+    font-size: 1.6rem;
+  }
+
+  #calculator-display-row-bottom {
+    font-size: 2.2rem;
+  }
+}
 /* ---------- Display — END ---------- */
 
 /* ---------- Keypad — START ---------- */

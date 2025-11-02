@@ -84,7 +84,7 @@ buttons.forEach((button) => {
 
     // ---------- Process Key - START ----------
     // Main function to handle most of the functionalities of the app
-    processKey(key, displayTop.textContent.length);
+    processKey(key, displayTop.textContent.length, displayBottom);
 
     // If a result was just produced, hand off to nextAction for chaining.
     if (calcState.isEvaluated) {
@@ -124,7 +124,7 @@ window.addEventListener("keydown", (e) => {
 
     // ---------- Process Key - START ----------
     // Main function to handle most of the functionalities of the app
-    processKey(key, displayTop.textContent.length);
+    processKey(key, displayTop.textContent.length, displayBottom);
 
     // If a result was just produced, hand off to nextAction for chaining.
     if (calcState.isEvaluated) {
@@ -171,10 +171,14 @@ function mute() {
 
 // ---------- Process input function ----------
 // Routes the button press to the correct state mutation path
-function processKey(key, length) {
+function processKey(key, length, bottom) {
   // Guard before append: only add when current length < MAX_LENGTH.
   // Using <= would allow one extra digit (overflow by one).
-  if (key.className === "number" && !(length < MAX_LENGTH)) return;
+  if (
+    (key.className === "number" || key.className === "operator") &&
+    !(length < MAX_LENGTH)
+  )
+    return (bottom.textContent = "TOO LONG");
 
   // Handle Number keys
   // Numbers either build the current operand or reset after a completed expression.

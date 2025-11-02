@@ -90,7 +90,7 @@ button {
     border-radius: 0;
     border-top: 3px solid #000;
     border-bottom: 3px solid #000;
-    height: 33rem;
+    height: 32rem;
   }
 
   #cat {
@@ -154,7 +154,7 @@ button {
 
 @media screen and (width <= 480px) {
   #calculator-display {
-    height: 12rem;
+    height: 13rem;
   }
 
   #calculator-display-row-top {
@@ -162,7 +162,7 @@ button {
   }
 
   #calculator-display-row-bottom {
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
 }
 /* ---------- Display — END ---------- */

@@ -125,31 +125,31 @@ function processKey(key, length) {
 
   // Handle Operator keys
   // Operators capture pending operations or trigger chained evaluations.
-  if (key.className === "operator" && !calcState.lastInputWasOperator) {
-    // Prevent user from using operator before inputting any value
-    if (!calcState.variableA) return;
-    else {
+
+  if (key.className === "operator") {
+    // Pending operation case
+    if (!calcState.lastInputWasOperator) {
+      // Prevent user from using operator before inputting any value
+      if (!calcState.variableA) return;
       // Soft reset Calculation State after an operator was input
-      softReset(calcState, key);
-    }
-  } else if (
-    key.className === "operator" &&
-    calcState.lastInputWasOperator &&
-    calcState.canEvaluate // Flag check to prevent user from trying to calculate without variable B
-  ) {
-    consecutiveCalculation(calcState, key);
+      else softReset(calcState, key);
+      // Consecutive calculation case
+    } else if (
+      calcState.lastInputWasOperator &&
+      calcState.canEvaluate // Flag check to prevent user from trying to calculate without variable B
+    )
+      consecutiveCalculation(calcState, key);
   }
 
-  // 3) "=" finalizes the expression and resets state for whatever comes next.
+  // Handle "=" key
+  // "=" finalizes the expression and resets state for whatever comes next.
   if (key.id === "btn-equal") {
     // Bail out if the equation is still incomplete (e.g., missing second operand)
     if (!calcState.canEvaluate) return;
     // When the expression is valid, fire the math calculation function
     else {
       mathCalculation(calcState);
-      calcState.sign = "";
-      calcState.lastInputWasOperator = false;
-      calcState.canEvaluate = false;
+      resetAfterCalc(calcState);
     }
   }
 
@@ -168,16 +168,10 @@ function processKey(key, length) {
     clearAll(calcState);
   }
 
+  // Clear One by One
   if (key.id === "btn-clear") {
     clearOneByOne(calcState);
   }
-  // Trace the current state so the flow is easy to debug during development.
-  console.log(`A: ${calcState.variableA}`);
-  console.log(typeof calcState.variableA);
-  // console.log(calcState.sign);
-  // console.log(`B: ${calcState.variableB}`);
-  // console.log(`Current class: ${key.className}`);
-  // console.log(`isEval: ${calcState.isEvaluated}`);
 }
 
 // ---------- Assign variables function ----------
@@ -208,11 +202,20 @@ function softReset(state, key) {
   return state;
 }
 
+// ---------- Hard reset function ----------
+function resetAfterCalc(state) {
+  state.sign = "";
+  state.lastInputWasOperator = false;
+  state.canEvaluate = false;
+  return state;
+}
+
 // ---------- Consecutive calculation function ----------
 function consecutiveCalculation(state, key) {
   mathCalculation(state);
   // After calculation, assign that operator to sign for consecutive calculation
   state.sign = key.id;
+  return state;
 }
 
 // ---------- Mathematic function ----------
@@ -230,6 +233,7 @@ function mathCalculation(state) {
     state.canEvaluate = false;
     state.variableB = "";
     state.isEvaluated = true;
+    // Depend on the output result, set decimal flag accordingly
     if (Number.isInteger(+state.variableA)) state.isDecimal = false;
     else state.isDecimal = true;
   }
@@ -261,9 +265,7 @@ function handleDecimal(state) {
   // If the decimal button is clicked before A was input, return
   if (!state.variableA) return;
 
-  // When the result of a calculation is a float with decimal, return
-  // if (!Number.isInteger(+state.variableA)) return;
-  // Handle result after calculation
+  // After evaluation, when user click on decimal, switch evaluation state
   if (state.isEvaluated) state.isEvaluated = false;
 
   if (!state.isDecimal) {
@@ -343,9 +345,6 @@ function render(key, state, top, bottom) {
     bottom.textContent = `${state.variableB}`;
   }
 
-  // if (key.id === "btn-decimal") {
-  //   bottom.textContent = "";
-  // }
   if (state.isEvaluated) return;
   const operator = document.getElementById(state.sign);
   if (!operator) top.textContent = `${state.variableA}`;
